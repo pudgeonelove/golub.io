@@ -1164,8 +1164,7 @@
   <script>
     'use strict';
 
-    const GEMINI_API_KEY = ""; // Do not commit a real secret to public GitHub Pages.
-    const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    const GROQ_API_KEY = "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"; 
     const STORAGE_KEYS = {
       theme: "school10.theme",
       chat: "school10.chatHistory",
@@ -2543,22 +2542,21 @@
     }
 
     function updateApiStatus() {
-      const hasKey = Boolean(GEMINI_API_KEY && GEMINI_API_KEY.trim().length > 12 && !GEMINI_API_KEY.includes("PASTE"));
+      const hasKey = Boolean(GROQ_API_KEY && GROQ_API_KEY.trim().length > 10 && !GROQ_API_KEY.includes("PASTE"));
       const label = document.getElementById("apiStatusLabel");
       const text = document.getElementById("apiStatusText");
       const dot = document.getElementById("apiStatusDot");
       if (!label || !text || !dot) return;
       if (hasKey) {
         label.textContent = "Готово";
-        text.textContent = "Запросы будут отправляться в Gemini Flash через fetch.";
+        text.textContent = "Запросы отправляются в Groq (Llama 3.1) через fetch.";
         dot.classList.remove("danger-dot");
       } else {
         label.textContent = "Без ключа";
-        text.textContent = "Включен офлайн-режим: секретный ключ не встроен в публичный файл.";
+        text.textContent = "Включен офлайн-режим: ключ Groq не встроен в файл.";
         dot.classList.add("danger-dot");
       }
     }
-
     function updateSendButton() {
       const input = document.getElementById("chatInput");
       const button = document.getElementById("sendButton");
@@ -2692,7 +2690,7 @@
     }
 
     async function askAssistant(text) {
-      const hasKey = Boolean(GEMINI_API_KEY && GEMINI_API_KEY.trim().length > 12 && !GEMINI_API_KEY.includes("PASTE"));
+      const hasKey = Boolean(GROQ_API_KEY && GROQ_API_KEY.trim().length > 10 && !GROQ_API_KEY.includes("PASTE"));
       if (!hasKey) {
         await wait(720);
         const imageQuery = wantsImage(text) ? makeImageQuery(text) : "";
@@ -2701,27 +2699,38 @@
         if (imageQuery) {
           message.image = makeUnsplashImage(imageQuery);
         }
-        showToast("Офлайн-режим", "Gemini API не вызван: секретный ключ не встроен в публичный HTML.", "info");
+        showToast("Офлайн-режим", "Groq API не вызван: ключ не прописан в коде.", "info");
         return message;
       }
 
-      const response = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+      const messages = [
+        {
+          role: "system",
+          content: "Ты — дружелюбный учебный ассистент для 10 класса. Отвечай строго на том языке, на котором написал пользователь (если вопрос на кыргызском языке — отвечай на кыргызском, если на русском — на русском). Отвечай кратко, по шагам, без HTML. Если ученик просит картинку, схему или иллюстрацию, добавь последней отдельной строкой IMAGE_QUERY: и 3-6 английских слов для фотобанка."
+        }
+      ];
+
+      // Добавляем последние сообщения для контекста
+      const recent = state.chat.slice(-8);
+      recent.forEach((msg) => {
+        messages.push({
+          role: msg.role === "assistant" ? "assistant" : "user",
+          content: String(msg.text || "").slice(0, 1200)
+        });
+      });
+      messages.push({ role: "user", content: text });
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GROQ_API_KEY}`
+        },
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: "Ты дружелюбный русскоязычный учебный ассистент для 10 класса. Отвечай кратко, по шагам, без HTML. Если ученик просит картинку, схему или иллюстрацию, добавь последней отдельной строкой IMAGE_QUERY: и 3-6 английских слов для фотобанка."
-              }
-            ]
-          },
-          contents: buildGeminiHistory(text),
-          generationConfig: {
-            temperature: 0.65,
-            topP: 0.9,
-            maxOutputTokens: 760
-          }
+          model: "llama-3.1-8b-instant",
+          messages: messages,
+          temperature: 0.65,
+          max_tokens: 760
         })
       });
 
@@ -2731,14 +2740,16 @@
       } catch (error) {
         payload = null;
       }
+
       if (!response.ok) {
-        const apiError = new Error(payload?.error?.message || "Gemini API вернул ошибку.");
+        const apiError = new Error(payload?.error?.message || "Groq API вернул ошибку.");
         apiError.status = response.status;
         throw apiError;
       }
-      const raw = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("\n").trim();
+
+      const raw = payload?.choices?.[0]?.message?.content?.trim();
       if (!raw) {
-        const emptyError = new Error("Gemini вернул пустой ответ.");
+        const emptyError = new Error("Groq вернул пустой ответ.");
         emptyError.status = 204;
         throw emptyError;
       }
@@ -2753,15 +2764,6 @@
         message.image = makeUnsplashImage(parsed.imageQuery || makeImageQuery(text));
       }
       return message;
-    }
-
-    function buildGeminiHistory(text) {
-      const recent = state.chat.slice(-8).map((message) => ({
-        role: message.role === "assistant" ? "model" : "user",
-        parts: [{ text: String(message.text || "").slice(0, 1200) }]
-      }));
-      recent.push({ role: "user", parts: [{ text }] });
-      return recent;
     }
 
     function wantsImage(text) {
@@ -2822,35 +2824,35 @@
         return {
           title: "Нет интернета",
           message: "Проверьте подключение и попробуйте отправить сообщение еще раз.",
-          chatText: "Не получилось обратиться к Gemini: похоже, устройство офлайн."
+          chatText: "Не получилось обратиться к Groq: устройство офлайн."
         };
       }
       const status = Number(error?.status || 0);
       if (status === 400 || status === 401 || status === 403) {
         return {
           title: "Проблема с API-ключом",
-          message: "Ключ неверный, заблокирован или не имеет доступа к модели Gemini Flash.",
-          chatText: "Gemini отклонил запрос из-за ключа или прав доступа. Проверьте ключ и доступ к модели."
+          message: "Ключ Groq неверный или заблокирован.",
+          chatText: "Groq отклонил запрос из-за ключа. Проверьте правильность ключа gsk_..."
         };
       }
       if (status === 429) {
         return {
           title: "Лимит API исчерпан",
-          message: "Слишком много запросов. Подождите немного и попробуйте снова.",
-          chatText: "Gemini сообщил о превышении лимита. Лучше повторить запрос позже."
+          message: "Слишком много запросов. Подождите минуту.",
+          chatText: "Превышен лимит запросов к Groq. Повторите попытку чуть позже."
         };
       }
       if (status >= 500) {
         return {
           title: "Сбой на стороне API",
-          message: "Сервис Gemini временно недоступен. Попробуйте повторить запрос позже.",
-          chatText: "Сервис Gemini временно не ответил. Я не буду повторять запрос автоматически, чтобы не тратить лимиты."
+          message: "Сервер Groq временно недоступен.",
+          chatText: "Сервис Groq временно не отвечает. Повторите запрос позже."
         };
       }
       return {
         title: "Запрос не выполнен",
-        message: "Ответ не получен. Проверьте сеть, ключ и доступность API.",
-        chatText: "Не удалось получить ответ от Gemini. Интерфейс продолжает работать, запрос можно повторить позже."
+        message: "Ответ не получен. Проверьте сеть и ключ.",
+        chatText: "Не удалось получить ответ от ассистента."
       };
     }
 
