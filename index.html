@@ -1163,8 +1163,7 @@
 
   <script>
     'use strict';
-
-    const GROQ_API_KEY = "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"; 
+ 
     const STORAGE_KEYS = {
       theme: "school10.theme",
       chat: "school10.chatHistory",
@@ -2542,20 +2541,14 @@
     }
 
     function updateApiStatus() {
-      const hasKey = Boolean(GROQ_API_KEY && GROQ_API_KEY.trim().length > 10 && !GROQ_API_KEY.includes("PASTE"));
       const label = document.getElementById("apiStatusLabel");
       const text = document.getElementById("apiStatusText");
       const dot = document.getElementById("apiStatusDot");
       if (!label || !text || !dot) return;
-      if (hasKey) {
-        label.textContent = "Готово";
-        text.textContent = "Запросы отправляются в Groq (Llama 3.1) через fetch.";
-        dot.classList.remove("danger-dot");
-      } else {
-        label.textContent = "Без ключа";
-        text.textContent = "Включен офлайн-режим: ключ Groq не встроен в файл.";
-        dot.classList.add("danger-dot");
-      }
+      label.textContent = "Защищено";
+      text.textContent = "ИИ работает через безопасный Cloudflare Worker.";
+      dot.classList.remove("danger-dot");
+    }
     }
     function updateSendButton() {
       const input = document.getElementById("chatInput");
@@ -2690,18 +2683,8 @@
     }
 
     async function askAssistant(text) {
-      const hasKey = Boolean(GROQ_API_KEY && GROQ_API_KEY.trim().length > 10 && !GROQ_API_KEY.includes("PASTE"));
-      if (!hasKey) {
-        await wait(720);
-        const imageQuery = wantsImage(text) ? makeImageQuery(text) : "";
-        const answer = makeOfflineAnswer(text, imageQuery);
-        const message = { role: "assistant", text: answer, ts: Date.now() };
-        if (imageQuery) {
-          message.image = makeUnsplashImage(imageQuery);
-        }
-        showToast("Офлайн-режим", "Groq API не вызван: ключ не прописан в коде.", "info");
-        return message;
-      }
+      // Ссылка на твой защищенный серверный прокси в Cloudflare Workers
+      const WORKER_URL = "https://anatolyi.dastanjunushaliev.workers.dev/"; 
 
       const messages = [
         {
@@ -2710,7 +2693,7 @@
         }
       ];
 
-      // Добавляем последние сообщения для контекста
+      // Собираем историю последних сообщений
       const recent = state.chat.slice(-8);
       recent.forEach((msg) => {
         messages.push({
@@ -2720,11 +2703,11 @@
       });
       messages.push({ role: "user", content: text });
 
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      // Отправляем запрос на свой защищенный воркер (ключ подставится автоматически на сервере)
+      const response = await fetch(WORKER_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GROQ_API_KEY}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
@@ -2742,14 +2725,14 @@
       }
 
       if (!response.ok) {
-        const apiError = new Error(payload?.error?.message || "Groq API вернул ошибку.");
+        const apiError = new Error(payload?.error?.message || "Ошибка сервера прокси.");
         apiError.status = response.status;
         throw apiError;
       }
 
       const raw = payload?.choices?.[0]?.message?.content?.trim();
       if (!raw) {
-        const emptyError = new Error("Groq вернул пустой ответ.");
+        const emptyError = new Error("Модель вернула пустой ответ.");
         emptyError.status = 204;
         throw emptyError;
       }
@@ -2765,7 +2748,6 @@
       }
       return message;
     }
-
     function wantsImage(text) {
       return /(картин|изображ|иллюстрац|фото|схем|покажи|визуализ|нарисуй)/i.test(text);
     }
