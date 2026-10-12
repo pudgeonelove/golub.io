@@ -1,0 +1,3054 @@
+<!doctype html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f17" id="themeColor">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="10 Класс">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Мобильный школьный портал 10 класса с 3D географией, алгеброй и ИИ-ассистентом.">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoi0KjQutC+0LvRjNC90YvQuSDQn9C+0YDRgtCw0LsgMTAg0JrQu9Cw0YHRgdCwIiwic2hvcnRfbmFtZSI6IjEwINCa0LvQsNGB0YEiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBiMGYxNyIsInRoZW1lX2NvbG9yIjoiIzYzNjZmMSIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W119">
+  <title>Школьный Портал 10 Класса</title>
+
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Arial', 'sans-serif'],
+            notebook: ['"Trebuchet MS"', 'Inter', 'ui-sans-serif', 'system-ui']
+          },
+          boxShadow: {
+            glow: '0 0 36px rgba(99, 102, 241, 0.28)',
+            emerald: '0 0 26px rgba(16, 185, 129, 0.22)'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f17;
+      --bg-soft: #101623;
+      --card: rgba(21, 28, 40, 0.78);
+      --card-strong: #151c28;
+      --card-muted: rgba(32, 42, 59, 0.68);
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #eef2ff;
+      --muted: #9aa7bd;
+      --subtle: #64748b;
+      --primary: #6366f1;
+      --primary-strong: #818cf8;
+      --emerald: #10b981;
+      --cyan: #22d3ee;
+      --amber: #f59e0b;
+      --danger: #fb7185;
+      --sheet: rgba(11, 15, 23, 0.92);
+      --input: rgba(255, 255, 255, 0.07);
+      --notebook: #fffef4;
+      --notebook-line: rgba(37, 99, 235, 0.22);
+      --notebook-text: #1e293b;
+      --notebook-red: rgba(239, 68, 68, 0.55);
+    }
+
+    :root.light {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --bg-soft: #eaf0f8;
+      --card: rgba(255, 255, 255, 0.78);
+      --card-strong: #ffffff;
+      --card-muted: rgba(226, 232, 240, 0.7);
+      --line: rgba(71, 85, 105, 0.16);
+      --text: #0f172a;
+      --muted: #475569;
+      --subtle: #64748b;
+      --primary: #4f46e5;
+      --primary-strong: #4338ca;
+      --emerald: #059669;
+      --cyan: #0891b2;
+      --amber: #d97706;
+      --danger: #e11d48;
+      --sheet: rgba(248, 250, 252, 0.95);
+      --input: rgba(15, 23, 42, 0.06);
+      --notebook: #fffdf0;
+      --notebook-line: rgba(37, 99, 235, 0.2);
+      --notebook-text: #1e293b;
+      --notebook-red: rgba(220, 38, 38, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, transparent 34%),
+        linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button:disabled {
+      opacity: 0.52;
+      cursor: not-allowed;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      isolation: isolate;
+    }
+
+    .glass {
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 8px;
+    }
+
+    .solid-card {
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .soft-card {
+      background: var(--card-muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .tap-button {
+      min-height: 44px;
+      border-radius: 8px;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+      touch-action: manipulation;
+    }
+
+    .tap-button:active {
+      transform: scale(0.98);
+    }
+
+    .icon-button {
+      width: 44px;
+      min-width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--text);
+    }
+
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--emerald));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.22);
+      padding: 0 14px;
+      font-weight: 700;
+    }
+
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text);
+      background: var(--input);
+      border: 1px solid var(--line);
+      padding: 0 13px;
+      font-weight: 650;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--text);
+      padding: 0 10px;
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--text);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .field:focus {
+      border-color: rgba(99, 102, 241, 0.68);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.16);
+    }
+
+    .field::placeholder {
+      color: var(--subtle);
+    }
+
+    .view {
+      display: none;
+      animation: fadeUp 220ms ease both;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 50;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(64px, 1fr));
+      gap: 6px;
+      padding: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      background: rgba(11, 15, 23, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .bottom-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    :root.light .bottom-nav {
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+    }
+
+    .nav-item {
+      min-width: 0;
+      min-height: 54px;
+      border-radius: 8px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.05;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(16, 185, 129, 0.86));
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.18);
+    }
+
+    :root.light .nav-item.active {
+      color: #ffffff;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 7vw, 42px);
+      line-height: 1.05;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .metric-value {
+      color: var(--text);
+      font-weight: 850;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .accent-text {
+      color: var(--primary-strong);
+    }
+
+    .emerald-text {
+      color: var(--emerald);
+    }
+
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.22), rgba(148, 163, 184, 0.12));
+      background-size: 220% 100%;
+      animation: shimmer 1.25s ease-in-out infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 120% 0;
+      }
+      100% {
+        background-position: -120% 0;
+      }
+    }
+
+    .globe-wrap {
+      position: relative;
+      min-height: 430px;
+      height: min(68vh, 620px);
+      overflow: hidden;
+      border-radius: 8px;
+      background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.13), rgba(11, 15, 23, 0.92) 58%, #050816 100%);
+    }
+
+    :root.light .globe-wrap {
+      background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.16), rgba(226, 232, 240, 0.82) 62%, rgba(203, 213, 225, 0.9) 100%);
+    }
+
+    #globeCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    .suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 12;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+    }
+
+    .suggestions[hidden] {
+      display: none;
+    }
+
+    .suggestion-row {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--text);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .suggestion-row:last-child {
+      border-bottom: 0;
+    }
+
+    .country-sheet {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      bottom: calc(92px + env(safe-area-inset-bottom));
+      z-index: 45;
+      max-width: 760px;
+      margin: 0 auto;
+      transform: translateY(calc(100% + 132px));
+      transition: transform 260ms cubic-bezier(.22, .72, .22, 1);
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 26px 64px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .country-sheet.open {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 52px;
+      height: 4px;
+      border-radius: 99px;
+      background: var(--line);
+      margin: 10px auto 2px;
+    }
+
+    .notebook {
+      position: relative;
+      color: var(--notebook-text);
+      background-color: var(--notebook);
+      background-image:
+        linear-gradient(var(--notebook-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--notebook-line) 1px, transparent 1px);
+      background-size: 24px 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      min-height: 300px;
+    }
+
+    .notebook::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 42px;
+      width: 2px;
+      background: var(--notebook-red);
+    }
+
+    .notebook-content {
+      position: relative;
+      z-index: 1;
+      padding: 26px 18px 30px 58px;
+      font-family: "Trebuchet MS", Inter, ui-sans-serif, system-ui;
+    }
+
+    .step-row {
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(37, 99, 235, 0.18);
+    }
+
+    .step-row:last-child {
+      border-bottom: 0;
+    }
+
+    .step-title {
+      color: #be123c;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .formula-box {
+      overflow-x: auto;
+      padding: 4px 0;
+      color: #1d4ed8;
+    }
+
+    .katex-display {
+      margin: 0.25rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 3px;
+    }
+
+    .chat-scroll {
+      height: min(58vh, 560px);
+      min-height: 380px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .message.user {
+      justify-items: end;
+    }
+
+    .bubble {
+      max-width: min(88%, 720px);
+      border-radius: 8px;
+      padding: 12px 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      border: 1px solid var(--line);
+    }
+
+    .message.user .bubble {
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--primary), #2563eb);
+    }
+
+    .message.assistant .bubble {
+      color: var(--text);
+      background: var(--card-muted);
+    }
+
+    .message-meta {
+      color: var(--subtle);
+      font-size: 12px;
+      padding: 0 4px;
+    }
+
+    .chat-image {
+      width: min(88%, 720px);
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--card-muted);
+    }
+
+    .chat-image img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: var(--card-muted);
+    }
+
+    .toast-stack {
+      position: fixed;
+      z-index: 80;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      top: max(12px, env(safe-area-inset-top));
+      display: grid;
+      gap: 10px;
+      max-width: 560px;
+      margin: 0 auto;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--sheet);
+      color: var(--text);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      align-items: start;
+      gap: 10px;
+      animation: toastIn 180ms ease both;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .toast[data-type="error"] {
+      border-color: rgba(251, 113, 133, 0.35);
+    }
+
+    .toast[data-type="success"] {
+      border-color: rgba(16, 185, 129, 0.38);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast-title {
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .toast-text {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .progress-line {
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary);
+    }
+
+    .valence-cell {
+      height: 10px;
+      border-radius: 99px;
+      background: rgba(148, 163, 184, 0.2);
+    }
+
+    .valence-cell.active {
+      background: linear-gradient(90deg, var(--primary), var(--emerald));
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.22);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      background: var(--emerald);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.62);
+    }
+
+    .danger-dot {
+      background: var(--danger);
+      box-shadow: 0 0 14px rgba(251, 113, 133, 0.5);
+    }
+
+    @media (min-width: 860px) {
+      body {
+        padding-bottom: 116px;
+      }
+
+      .bottom-nav {
+        bottom: 18px;
+      }
+
+      .country-sheet {
+        bottom: 112px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .section-title {
+        font-size: 30px;
+      }
+
+      .nav-item {
+        font-size: 10px;
+      }
+
+      .globe-wrap {
+        min-height: 390px;
+        height: 62vh;
+      }
+
+      .notebook-content {
+        padding-left: 52px;
+        padding-right: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color:var(--bg)]/78 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <button class="tap-button flex min-w-0 items-center gap-3 text-left" type="button" data-route-jump="home" aria-label="Открыть главную">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] border border-[var(--line)] bg-[var(--input)] shadow-glow">
+            <i data-lucide="graduation-cap" aria-hidden="true"></i>
+          </span>
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-extrabold text-[var(--text)]">Школьный Портал 10 Класса</span>
+            <span class="block truncate text-xs font-semibold text-[var(--muted)]" id="todayLine">Учебный день</span>
+          </span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button class="icon-button tap-button" id="themeToggle" type="button" aria-label="Переключить тему">
+            <i data-lucide="moon" aria-hidden="true"></i>
+          </button>
+          <button class="icon-button tap-button" id="installButton" type="button" aria-label="Установить портал">
+            <i data-lucide="download" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 pb-4 pt-5 sm:pt-8">
+      <section class="view active" data-view="home" aria-labelledby="homeTitle">
+        <div class="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+          <div class="grid gap-5">
+            <div>
+              <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">10 класс</p>
+              <h1 class="section-title" id="homeTitle">Портал для уроков, задач и быстрых вопросов</h1>
+              <p class="section-subtitle mt-4 max-w-2xl">География с 3D-глобусом, тетрадный разбор алгебры и учебный ИИ-чат собраны в одном мобильном интерфейсе.</p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="geo">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-indigo-500/16 text-[var(--primary-strong)]">
+                  <i data-lucide="globe-2" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">География 3D</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">Страны, маркеры и экономические профили.</span>
+              </button>
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="algebra">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-500/16 text-[var(--emerald)]">
+                  <i data-lucide="radical" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">Алгебра</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">Квадратные уравнения, тригонометрия, производные.</span>
+              </button>
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="assistant">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-cyan-500/16 text-[var(--cyan)]">
+                  <i data-lucide="bot" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">ИИ-Ассистент</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">История чата, иллюстрации и защита от спама.</span>
+              </button>
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="physics">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-violet-500/16 text-[var(--primary-strong)]">
+                  <i data-lucide="atom" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">Физика</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">Ползунки для силы, энергии, пути и теплоты.</span>
+              </button>
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="chemistry">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-500/16 text-[var(--emerald)]">
+                  <i data-lucide="flask-conical" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">Химия</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">Топ-20 элементов и шкала валентности.</span>
+              </button>
+              <button class="solid-card tap-button p-4 text-left" type="button" data-route-jump="history">
+                <span class="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-amber-500/16 text-[var(--amber)]">
+                  <i data-lucide="scroll-text" aria-hidden="true"></i>
+                </span>
+                <span class="block text-base font-extrabold">История</span>
+                <span class="mt-1 block text-sm leading-5 text-[var(--muted)]">Хронология XX-XXI века с фильтрами.</span>
+              </button>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="glass p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-bold text-[var(--muted)]">Учебный фокус</p>
+                    <p class="mt-2 text-2xl font-black">География + алгебра</p>
+                  </div>
+                  <span class="chip"><i data-lucide="sparkles" aria-hidden="true"></i>Активно</span>
+                </div>
+                <div class="mt-5 grid gap-3">
+                  <div>
+                    <div class="mb-2 flex items-center justify-between text-sm font-semibold">
+                      <span>Готовность портала</span>
+                      <span class="emerald-text">92%</span>
+                    </div>
+                    <div class="progress-line" aria-label="Готовность портала"><div class="progress-fill" style="width: 92%"></div></div>
+                  </div>
+                  <div>
+                    <div class="mb-2 flex items-center justify-between text-sm font-semibold">
+                      <span>Мобильный UX</span>
+                      <span class="accent-text">88%</span>
+                    </div>
+                    <div class="progress-line" aria-label="Мобильный UX"><div class="progress-fill" style="width: 88%"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="glass p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-bold text-[var(--muted)]">Быстрые действия</p>
+                    <p class="mt-1 text-xl font-black">Начать с примера</p>
+                  </div>
+                  <i data-lucide="zap" class="text-[var(--amber)]" aria-hidden="true"></i>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button class="chip tap-button" type="button" data-country-quick="Япония"><i data-lucide="map-pin" aria-hidden="true"></i>Япония</button>
+                  <button class="chip tap-button" type="button" data-algebra-example="x^2 - 5x + 6 = 0" data-algebra-type="quadratic"><i data-lucide="calculator" aria-hidden="true"></i>x² - 5x + 6</button>
+                  <button class="chip tap-button" type="button" data-chat-prompt="Объясни, как найти производную функции 3x^3 - 2x^2 + 7x - 4."><i data-lucide="message-circle" aria-hidden="true"></i>Спросить ИИ</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="grid gap-3">
+            <div class="solid-card p-4">
+              <div class="flex items-center gap-3">
+                <span class="flex h-10 w-10 items-center justify-center rounded-[8px] bg-emerald-500/15 text-[var(--emerald)]"><i data-lucide="shield-check" aria-hidden="true"></i></span>
+                <div>
+                  <p class="font-extrabold">Безопасный вывод</p>
+                  <p class="text-sm text-[var(--muted)]">Текст чата вставляется без выполнения HTML.</p>
+                </div>
+              </div>
+            </div>
+            <div class="solid-card p-4">
+              <div class="flex items-center gap-3">
+                <span class="flex h-10 w-10 items-center justify-center rounded-[8px] bg-indigo-500/15 text-[var(--primary-strong)]"><i data-lucide="database" aria-hidden="true"></i></span>
+                <div>
+                  <p class="font-extrabold">Устойчивое хранилище</p>
+                  <p class="text-sm text-[var(--muted)]">Ошибки localStorage не роняют интерфейс.</p>
+                </div>
+              </div>
+            </div>
+            <div class="solid-card p-4">
+              <div class="flex items-center gap-3">
+                <span class="flex h-10 w-10 items-center justify-center rounded-[8px] bg-cyan-500/15 text-[var(--cyan)]"><i data-lucide="smartphone" aria-hidden="true"></i></span>
+                <div>
+                  <p class="font-extrabold">PWA-готовность</p>
+                  <p class="text-sm text-[var(--muted)]">Мета-теги, тема и manifest-заглушка уже внутри.</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view="geo" aria-labelledby="geoTitle">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Модуль А</p>
+            <h2 class="section-title" id="geoTitle">География 3D</h2>
+            <p class="section-subtitle mt-3">Вращайте глобус жестами, ищите страну или выбирайте маркер на сфере.</p>
+          </div>
+          <button class="secondary-button tap-button" id="resetGlobe" type="button">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+            Сброс
+          </button>
+        </div>
+
+        <div class="globe-wrap glass">
+          <canvas id="globeCanvas" aria-label="Интерактивный 3D глобус с маркерами стран"></canvas>
+
+          <div class="pointer-events-none absolute inset-x-0 top-0 z-10 p-3 sm:p-4">
+            <div class="pointer-events-auto relative mx-auto max-w-xl">
+              <label class="sr-only" for="countrySearch">Поиск страны</label>
+              <div class="flex items-center gap-2 rounded-[8px] border border-[var(--line)] bg-[var(--sheet)]/82 px-3 py-2 backdrop-blur-md">
+                <i data-lucide="search" class="h-5 w-5 shrink-0 text-[var(--muted)]" aria-hidden="true"></i>
+                <input class="field border-0 bg-transparent px-0 py-2 shadow-none focus:shadow-none" id="countrySearch" type="search" autocomplete="off" placeholder="Найти страну: Бразилия, Япония, Казахстан">
+              </div>
+              <div class="suggestions" id="countrySuggestions" hidden></div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-2">
+            <button class="chip tap-button" type="button" data-country-quick="Казахстан"><i data-lucide="map-pin" aria-hidden="true"></i>Казахстан</button>
+            <button class="chip tap-button" type="button" data-country-quick="Бразилия"><i data-lucide="map-pin" aria-hidden="true"></i>Бразилия</button>
+            <button class="chip tap-button" type="button" data-country-quick="Германия"><i data-lucide="map-pin" aria-hidden="true"></i>Германия</button>
+          </div>
+
+          <div class="absolute inset-0 z-20 grid place-items-center bg-[var(--bg)]/72 p-6 backdrop-blur-sm" id="globeSkeleton">
+            <div class="w-full max-w-md">
+              <div class="skeleton mx-auto h-52 w-52 rounded-full"></div>
+              <div class="skeleton mx-auto mt-6 h-5 w-64"></div>
+              <div class="skeleton mx-auto mt-3 h-4 w-44"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="country-sheet" id="countrySheet" aria-live="polite">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="flex items-start justify-between gap-3 px-4 pb-4 pt-3">
+            <div id="countryDetails" class="min-w-0"></div>
+            <button class="icon-button tap-button" id="closeCountrySheet" type="button" aria-label="Закрыть карточку страны">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="algebra" aria-labelledby="algebraTitle">
+        <div class="mb-4">
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Модуль Б</p>
+          <h2 class="section-title" id="algebraTitle">Умный тетрадный решатель</h2>
+          <p class="section-subtitle mt-3">Выберите тему, введите пример и получите пошаговый разбор в тетрадном формате.</p>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-[0.88fr_1.12fr]">
+          <div class="glass p-4">
+            <div class="grid gap-4">
+              <div>
+                <label class="mb-2 block text-sm font-bold text-[var(--muted)]" for="algebraType">Тема</label>
+                <select class="field px-3 py-3" id="algebraType">
+                  <option value="quadratic">Квадратное уравнение</option>
+                  <option value="trig">Тригонометрия</option>
+                  <option value="derivative">Производная</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-bold text-[var(--muted)]" for="algebraInput">Задача</label>
+                <textarea class="field min-h-[128px] resize-y px-3 py-3" id="algebraInput" spellcheck="false">x^2 - 5x + 6 = 0</textarea>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button class="chip tap-button" type="button" data-algebra-example="2x^2 + 3x - 2 = 0" data-algebra-type="quadratic">2x² + 3x - 2</button>
+                <button class="chip tap-button" type="button" data-algebra-example="sin x = 1/2" data-algebra-type="trig">sin x = 1/2</button>
+                <button class="chip tap-button" type="button" data-algebra-example="3x^3 - 2x^2 + 7x - 4" data-algebra-type="derivative">f'(x)</button>
+              </div>
+
+              <button class="primary-button tap-button h-12 w-full" id="solveButton" type="button">
+                <i data-lucide="sparkles" aria-hidden="true"></i>
+                Решить пошагово
+              </button>
+            </div>
+          </div>
+
+          <div class="notebook" aria-live="polite">
+            <div class="notebook-content" id="notebookContent"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="physics" aria-labelledby="physicsTitle">
+        <div class="mb-4">
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Физика</p>
+          <h2 class="section-title" id="physicsTitle">Симулятор формул</h2>
+          <p class="section-subtitle mt-3">Двигайте ползунки и сразу смотрите, как меняется результат.</p>
+        </div>
+        <div class="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+          <div class="glass p-4">
+            <label class="mb-2 block text-sm font-bold text-[var(--muted)]" for="physicsFormula">Формула</label>
+            <select class="field px-3 py-3" id="physicsFormula"></select>
+            <div class="mt-4 grid gap-2" id="physicsTopics"></div>
+          </div>
+          <div class="glass p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-sm font-bold text-[var(--muted)]" id="physicsTopic">Кинематика</p>
+                <h3 class="mt-1 text-2xl font-black" id="physicsName">Формула</h3>
+              </div>
+              <span class="chip" id="physicsLatex"></span>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-[var(--muted)]" id="physicsDesc"></p>
+            <div class="mt-5 grid gap-4" id="physicsControls"></div>
+            <div class="soft-card mt-5 p-4">
+              <p class="text-sm font-bold text-[var(--muted)]">Результат</p>
+              <p class="mt-2 text-3xl font-black text-[var(--emerald)]" id="physicsResult">0</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="chemistry" aria-labelledby="chemistryTitle">
+        <div class="mb-4">
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Химия</p>
+          <h2 class="section-title" id="chemistryTitle">Справочник элементов</h2>
+          <p class="section-subtitle mt-3">Поиск по символу, названию или выбор из популярных элементов 10 класса.</p>
+        </div>
+        <div class="grid gap-4 lg:grid-cols-[0.75fr_1.25fr]">
+          <div class="glass p-4">
+            <label class="mb-2 block text-sm font-bold text-[var(--muted)]" for="elementSearch">Элемент</label>
+            <input class="field px-3 py-3" id="elementSearch" type="search" placeholder="H, кислород, Fe...">
+            <div class="mt-4 flex flex-wrap gap-2" id="elementChips"></div>
+          </div>
+          <div class="glass p-4" id="elementCard" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="history" aria-labelledby="historyTitle">
+        <div class="mb-4">
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">История</p>
+          <h2 class="section-title" id="historyTitle">Лента XX-XXI века</h2>
+          <p class="section-subtitle mt-3">Фильтруйте эпохи и раскрывайте карточки событий.</p>
+        </div>
+        <div class="glass p-4">
+          <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <select class="field px-3 py-3" id="historyEra" aria-label="Фильтр эпохи"></select>
+            <input class="field px-3 py-3" id="historyYear" type="number" min="1900" max="2026" placeholder="Год">
+          </div>
+          <div class="mt-5 grid gap-3" id="historyList" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="assistant" aria-labelledby="assistantTitle">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Модуль В</p>
+            <h2 class="section-title" id="assistantTitle">ИИ-Ассистент</h2>
+            <p class="section-subtitle mt-3">Чат хранит историю локально, блокирует повторные отправки и показывает понятные ошибки API.</p>
+          </div>
+          <button class="secondary-button tap-button" id="clearChatButton" type="button">
+            <i data-lucide="trash-2" aria-hidden="true"></i>
+            Очистить
+          </button>
+        </div>
+
+        <div class="glass p-3 sm:p-4">
+          <div class="chat-scroll pr-1" id="chatMessages" aria-live="polite"></div>
+          <form class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]" id="chatForm">
+            <label class="sr-only" for="chatInput">Сообщение для ИИ</label>
+            <textarea class="field min-h-[54px] resize-none px-3 py-3" id="chatInput" maxlength="1600" placeholder="Спроси про урок, формулу, страну или попроси схему..." required></textarea>
+            <button class="primary-button tap-button h-[54px] px-5" id="sendButton" type="submit">
+              <i data-lucide="send" aria-hidden="true"></i>
+              <span>Отправить</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" data-view="settings" aria-labelledby="settingsTitle">
+        <div class="mb-4">
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--emerald)]">Портал</p>
+          <h2 class="section-title" id="settingsTitle">Настройки</h2>
+          <p class="section-subtitle mt-3">Тема, локальные данные, тактильный отклик и состояние подключений.</p>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2">
+          <div class="glass p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-lg font-extrabold">Светлая тема</p>
+                <p class="text-sm leading-5 text-[var(--muted)]">Выбор сохраняется на устройстве.</p>
+              </div>
+              <button class="secondary-button tap-button h-11" id="themeModeButton" type="button">
+                <i data-lucide="sun" aria-hidden="true"></i>
+                Переключить
+              </button>
+            </div>
+          </div>
+
+          <div class="glass p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-lg font-extrabold">Тактильный отклик</p>
+                <p class="text-sm leading-5 text-[var(--muted)]">Легкая вибрация на основных действиях.</p>
+              </div>
+              <button class="secondary-button tap-button h-11" id="hapticsButton" type="button" aria-pressed="true">
+                <i data-lucide="activity" aria-hidden="true"></i>
+                Вкл
+              </button>
+            </div>
+          </div>
+
+          <div class="glass p-4">
+            <div class="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <p class="text-lg font-extrabold">Локальные данные</p>
+                <p class="text-sm leading-5 text-[var(--muted)]">История чата и настройки темы.</p>
+              </div>
+              <i data-lucide="hard-drive" class="text-[var(--primary-strong)]" aria-hidden="true"></i>
+            </div>
+            <button class="secondary-button tap-button h-11 w-full" id="wipeDataButton" type="button">
+              <i data-lucide="eraser" aria-hidden="true"></i>
+              Сбросить данные
+            </button>
+          </div>
+
+          <div class="glass p-4">
+            <div class="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <p class="text-lg font-extrabold">Gemini API</p>
+                <p class="text-sm leading-5 text-[var(--muted)]" id="apiStatusText">Проверка состояния...</p>
+              </div>
+              <span class="flex items-center gap-2 rounded-[8px] border border-[var(--line)] bg-[var(--input)] px-3 py-2 text-sm font-bold">
+                <span class="status-dot" id="apiStatusDot"></span>
+                <span id="apiStatusLabel">Готово</span>
+              </span>
+            </div>
+            <p class="text-sm leading-6 text-[var(--muted)]">Для публичного GitHub Pages используйте серверный прокси: клиентский JavaScript не может скрыть секретный ключ от посетителей.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Основная навигация">
+      <button class="nav-item active tap-button" type="button" data-route="home" aria-label="Главная">
+        <i data-lucide="home" aria-hidden="true"></i>
+        <span>Главная</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="geo" aria-label="География 3D">
+        <i data-lucide="globe-2" aria-hidden="true"></i>
+        <span>География</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="algebra" aria-label="Алгебра">
+        <i data-lucide="radical" aria-hidden="true"></i>
+        <span>Алгебра</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="physics" aria-label="Физика">
+        <i data-lucide="atom" aria-hidden="true"></i>
+        <span>Физика</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="chemistry" aria-label="Химия">
+        <i data-lucide="flask-conical" aria-hidden="true"></i>
+        <span>Химия</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="history" aria-label="История">
+        <i data-lucide="scroll-text" aria-hidden="true"></i>
+        <span>История</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="assistant" aria-label="ИИ-Ассистент">
+        <i data-lucide="bot" aria-hidden="true"></i>
+        <span>ИИ</span>
+      </button>
+      <button class="nav-item tap-button" type="button" data-route="settings" aria-label="Настройки">
+        <i data-lucide="settings" aria-hidden="true"></i>
+        <span>Настройки</span>
+      </button>
+    </nav>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const GEMINI_API_KEY = ""; // Do not commit a real secret to public GitHub Pages.
+    const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    const STORAGE_KEYS = {
+      theme: "school10.theme",
+      chat: "school10.chatHistory",
+      haptics: "school10.haptics"
+    };
+
+    const storage = {
+      get(key, fallback) {
+        try {
+          const raw = window.localStorage.getItem(key);
+          if (raw === null || raw === undefined) return fallback;
+          return JSON.parse(raw);
+        } catch (error) {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+      remove(key) {
+        try {
+          window.localStorage.removeItem(key);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+    };
+
+    const state = {
+      route: "home",
+      theme: storage.get(STORAGE_KEYS.theme, "dark"),
+      haptics: storage.get(STORAGE_KEYS.haptics, true),
+      chat: storage.get(STORAGE_KEYS.chat, [
+        {
+          role: "assistant",
+          text: "Привет! Я помогу с географией, алгеброй и подготовкой к урокам. Можешь попросить объяснить тему или показать иллюстрацию.",
+          ts: Date.now()
+        }
+      ]),
+      aiBusy: false,
+      lastSendAt: 0,
+      globeReady: false,
+      selectedCountry: null
+    };
+
+    const countries = [
+      {
+        name: "Казахстан",
+        capital: "Астана",
+        population: "около 20 млн",
+        gdp: "примерно 260 млрд долларов",
+        climate: "резко континентальный: холодная зима, жаркое и сухое лето",
+        industries: "нефть, газ, уран, металлургия, зерновое хозяйство, логистика",
+        lat: 48.0196,
+        lon: 66.9237,
+        note: "Крупнейшая страна Центральной Азии по площади и важный транзитный узел Евразии."
+      },
+      {
+        name: "Япония",
+        capital: "Токио",
+        population: "около 124 млн",
+        gdp: "примерно 4,2 трлн долларов",
+        climate: "муссонный, от умеренного на севере до субтропического на юге",
+        industries: "автомобили, робототехника, электроника, судостроение, химия",
+        lat: 36.2048,
+        lon: 138.2529,
+        note: "Островная высокоразвитая страна с дефицитом сырья и мощной промышленной специализацией."
+      },
+      {
+        name: "Германия",
+        capital: "Берлин",
+        population: "около 84 млн",
+        gdp: "примерно 4,5 трлн долларов",
+        climate: "умеренный морской и переходный к континентальному",
+        industries: "машиностроение, автомобили, химия, фармацевтика, энергетика",
+        lat: 51.1657,
+        lon: 10.4515,
+        note: "Один из индустриальных центров Европы с развитой транспортной сетью."
+      },
+      {
+        name: "Бразилия",
+        capital: "Бразилиа",
+        population: "около 216 млн",
+        gdp: "примерно 2,2 трлн долларов",
+        climate: "экваториальный, тропический и субтропический на юге",
+        industries: "агробизнес, железная руда, нефть, авиастроение, пищевая промышленность",
+        lat: -14.235,
+        lon: -51.9253,
+        note: "Крупнейшая страна Южной Америки, где Амазония влияет на климат всего континента."
+      },
+      {
+        name: "Канада",
+        capital: "Оттава",
+        population: "около 40 млн",
+        gdp: "примерно 2,1 трлн долларов",
+        climate: "от арктического на севере до умеренного на юге",
+        industries: "нефть, газ, лес, цветные металлы, сельское хозяйство, IT",
+        lat: 56.1304,
+        lon: -106.3468,
+        note: "Страна с огромными природными ресурсами и низкой средней плотностью населения."
+      },
+      {
+        name: "Индия",
+        capital: "Нью-Дели",
+        population: "более 1,4 млрд",
+        gdp: "примерно 3,7 трлн долларов",
+        climate: "тропический муссонный с выраженным сезоном дождей",
+        industries: "IT-услуги, текстиль, фармацевтика, машиностроение, сельское хозяйство",
+        lat: 20.5937,
+        lon: 78.9629,
+        note: "Одна из самых населенных стран мира с быстро растущей экономикой."
+      },
+      {
+        name: "Египет",
+        capital: "Каир",
+        population: "около 112 млн",
+        gdp: "примерно 395 млрд долларов",
+        climate: "пустынный, очень сухой, с жизнью, сосредоточенной вдоль Нила",
+        industries: "туризм, газ, хлопок, пищевая промышленность, Суэцкий канал",
+        lat: 26.8206,
+        lon: 30.8025,
+        note: "Нил формирует главную ось расселения и хозяйства страны."
+      },
+      {
+        name: "ЮАР",
+        capital: "Претория",
+        population: "около 60 млн",
+        gdp: "примерно 380 млрд долларов",
+        climate: "субтропический, средиземноморский на юго-западе, сухой внутри плато",
+        industries: "добыча золота и платины, энергетика, автомобили, финансы, виноделие",
+        lat: -30.5595,
+        lon: 22.9375,
+        note: "Крупнейший индустриальный центр Африки южнее Сахары."
+      },
+      {
+        name: "Австралия",
+        capital: "Канберра",
+        population: "около 27 млн",
+        gdp: "примерно 1,7 трлн долларов",
+        climate: "сухой тропический и субтропический, умеренный на юго-востоке",
+        industries: "железная руда, уголь, газ, сельское хозяйство, образование, туризм",
+        lat: -25.2744,
+        lon: 133.7751,
+        note: "Материковое государство с высокой урбанизацией при огромных малозаселенных пространствах."
+      },
+      {
+        name: "США",
+        capital: "Вашингтон",
+        population: "около 335 млн",
+        gdp: "более 27 трлн долларов",
+        climate: "от арктического на Аляске до тропического на Гавайях и во Флориде",
+        industries: "IT, финансы, авиакосмос, автомобили, сельское хозяйство, энергетика",
+        lat: 39.8283,
+        lon: -98.5795,
+        note: "Одна из крупнейших экономик мира с разнообразием природных зон и отраслей."
+      },
+      {
+        name: "Китай",
+        capital: "Пекин",
+        population: "около 1,4 млрд",
+        gdp: "примерно 17,8 трлн долларов",
+        climate: "от резко континентального на севере до субтропического на юге",
+        industries: "машиностроение, электроника, металлургия, текстиль, химия",
+        lat: 35.8617,
+        lon: 104.1954,
+        note: "Крупный промышленный центр мира с контрастами расселения востока и запада."
+      },
+      {
+        name: "Франция",
+        capital: "Париж",
+        population: "около 68 млн",
+        gdp: "примерно 3 трлн долларов",
+        climate: "умеренный морской, средиземноморский на юге",
+        industries: "авиация, автомобили, химия, туризм, сельское хозяйство",
+        lat: 46.2276,
+        lon: 2.2137,
+        note: "Одна из ведущих экономик ЕС с сильным аграрным и туристическим сектором."
+      },
+      {
+        name: "Великобритания",
+        capital: "Лондон",
+        population: "около 67 млн",
+        gdp: "примерно 3,3 трлн долларов",
+        climate: "умеренный морской, мягкий и влажный",
+        industries: "финансы, фармацевтика, авиакосмос, IT, образование",
+        lat: 55.3781,
+        lon: -3.436,
+        note: "Островная страна с высокой ролью услуг и исторически важным морским положением."
+      },
+      {
+        name: "Италия",
+        capital: "Рим",
+        population: "около 59 млн",
+        gdp: "примерно 2,2 трлн долларов",
+        climate: "средиземноморский, в Альпах горный",
+        industries: "машиностроение, мода, туризм, пищевая промышленность, автомобили",
+        lat: 41.8719,
+        lon: 12.5674,
+        note: "Индустриальный север и аграрно-туристический юг показывают региональные различия."
+      },
+      {
+        name: "Испания",
+        capital: "Мадрид",
+        population: "около 48 млн",
+        gdp: "примерно 1,6 трлн долларов",
+        climate: "средиземноморский, океанический на севере, сухой внутри страны",
+        industries: "туризм, автомобили, сельское хозяйство, энергетика, пищевая промышленность",
+        lat: 40.4637,
+        lon: -3.7492,
+        note: "Важная страна Южной Европы с мощным туристическим сектором."
+      },
+      {
+        name: "Россия",
+        capital: "Москва",
+        population: "около 146 млн",
+        gdp: "примерно 2 трлн долларов",
+        climate: "от арктического до умеренно континентального и муссонного на востоке",
+        industries: "нефть, газ, металлургия, химия, машиностроение, лес",
+        lat: 61.524,
+        lon: 105.3188,
+        note: "Крупнейшая страна мира по площади с большими ресурсами и разреженным севером."
+      },
+      {
+        name: "Турция",
+        capital: "Анкара",
+        population: "около 86 млн",
+        gdp: "примерно 1,1 трлн долларов",
+        climate: "средиземноморский на побережьях и континентальный во внутренних районах",
+        industries: "текстиль, автомобили, металлургия, туризм, сельское хозяйство",
+        lat: 38.9637,
+        lon: 35.2433,
+        note: "Страна на стыке Европы и Азии с важным транзитным положением."
+      },
+      {
+        name: "Саудовская Аравия",
+        capital: "Эр-Рияд",
+        population: "около 37 млн",
+        gdp: "примерно 1,1 трлн долларов",
+        climate: "жаркий пустынный",
+        industries: "нефть, нефтехимия, энергетика, строительство, логистика",
+        lat: 23.8859,
+        lon: 45.0792,
+        note: "Один из крупнейших экспортеров нефти с быстрым развитием новых отраслей."
+      },
+      {
+        name: "Аргентина",
+        capital: "Буэнос-Айрес",
+        population: "около 46 млн",
+        gdp: "примерно 640 млрд долларов",
+        climate: "от субтропического на севере до умеренного и прохладного на юге",
+        industries: "сельское хозяйство, мясо, зерно, энергетика, автомобили",
+        lat: -38.4161,
+        lon: -63.6167,
+        note: "Пампа является одной из важных сельскохозяйственных областей мира."
+      },
+      {
+        name: "Индонезия",
+        capital: "Джакарта",
+        population: "около 280 млн",
+        gdp: "примерно 1,4 трлн долларов",
+        climate: "экваториальный влажный",
+        industries: "пальмовое масло, уголь, никель, текстиль, туризм",
+        lat: -0.7893,
+        lon: 113.9213,
+        note: "Крупнейшее островное государство мира с муссонными и экваториальными ландшафтами."
+      }
+    ];
+
+    const imageHints = [
+      ["географ", "world geography classroom"],
+      ["глобус", "earth globe education"],
+      ["климат", "climate zones map"],
+      ["эконом", "industry economy geography"],
+      ["производн", "calculus derivative graph"],
+      ["тригоном", "trigonometry unit circle"],
+      ["квадрат", "quadratic function parabola"],
+      ["парабол", "parabola math graph"],
+      ["схем", "education diagram"],
+      ["картин", "school science illustration"],
+      ["фото", "school science illustration"]
+    ];
+
+    const physicsFormulas = [
+      { id: "force", topic: "Динамика", name: "Второй закон Ньютона", latex: "F = m·a", desc: "Сила прямо пропорциональна массе тела и ускорению.", unit: "Н", vars: [["m", "Масса", 1, 100, 1, 12, "кг"], ["a", "Ускорение", 0, 20, 0.1, 4, "м/с²"]], calc: (v) => v.m * v.a },
+      { id: "motion", topic: "Кинематика", name: "Путь при равноускоренном движении", latex: "s = v₀t + at²/2", desc: "Показывает путь при начальной скорости и постоянном ускорении.", unit: "м", vars: [["v0", "Начальная скорость", 0, 40, 1, 10, "м/с"], ["t", "Время", 1, 20, 0.5, 6, "с"], ["a", "Ускорение", -10, 10, 0.1, 2, "м/с²"]], calc: (v) => v.v0 * v.t + v.a * v.t * v.t / 2 },
+      { id: "energy", topic: "Законы сохранения", name: "Кинетическая энергия", latex: "Eₖ = mv²/2", desc: "Энергия движения зависит от массы и квадрата скорости.", unit: "Дж", vars: [["m", "Масса", 1, 80, 1, 8, "кг"], ["v", "Скорость", 1, 60, 1, 12, "м/с"]], calc: (v) => v.m * v.v * v.v / 2 },
+      { id: "momentum", topic: "Законы сохранения", name: "Импульс тела", latex: "p = m·v", desc: "Импульс помогает разбирать столкновения и отдачу.", unit: "кг·м/с", vars: [["m", "Масса", 1, 100, 1, 15, "кг"], ["v", "Скорость", 0, 50, 1, 9, "м/с"]], calc: (v) => v.m * v.v },
+      { id: "heat", topic: "Термодинамика", name: "Количество теплоты", latex: "Q = c·m·ΔT", desc: "Сколько энергии нужно для нагревания вещества.", unit: "кДж", vars: [["c", "Удельная теплоемкость", 400, 4500, 100, 4200, "Дж/(кг·°C)"], ["m", "Масса", 0.1, 10, 0.1, 1, "кг"], ["dt", "ΔT", 1, 100, 1, 20, "°C"]], calc: (v) => v.c * v.m * v.dt / 1000 }
+    ];
+
+    const elements = [
+      ["H", "Водород", 1, "1.008", "1s¹", "неметалл", [1]],
+      ["C", "Углерод", 6, "12.011", "1s² 2s² 2p²", "неметалл", [2, 4]],
+      ["N", "Азот", 7, "14.007", "1s² 2s² 2p³", "неметалл", [3, 5]],
+      ["O", "Кислород", 8, "15.999", "1s² 2s² 2p⁴", "неметалл", [2]],
+      ["Na", "Натрий", 11, "22.990", "[Ne] 3s¹", "щелочной металл", [1]],
+      ["Mg", "Магний", 12, "24.305", "[Ne] 3s²", "металл", [2]],
+      ["Al", "Алюминий", 13, "26.982", "[Ne] 3s² 3p¹", "металл", [3]],
+      ["Si", "Кремний", 14, "28.085", "[Ne] 3s² 3p²", "полуметалл", [4]],
+      ["P", "Фосфор", 15, "30.974", "[Ne] 3s² 3p³", "неметалл", [3, 5]],
+      ["S", "Сера", 16, "32.06", "[Ne] 3s² 3p⁴", "неметалл", [2, 4, 6]],
+      ["Cl", "Хлор", 17, "35.45", "[Ne] 3s² 3p⁵", "галоген", [1, 3, 5, 7]],
+      ["K", "Калий", 19, "39.098", "[Ar] 4s¹", "щелочной металл", [1]],
+      ["Ca", "Кальций", 20, "40.078", "[Ar] 4s²", "металл", [2]],
+      ["Fe", "Железо", 26, "55.845", "[Ar] 3d⁶ 4s²", "переходный металл", [2, 3]],
+      ["Cu", "Медь", 29, "63.546", "[Ar] 3d¹⁰ 4s¹", "переходный металл", [1, 2]],
+      ["Zn", "Цинк", 30, "65.38", "[Ar] 3d¹⁰ 4s²", "металл", [2]],
+      ["Br", "Бром", 35, "79.904", "[Ar] 3d¹⁰ 4s² 4p⁵", "галоген", [1, 3, 5, 7]],
+      ["Ag", "Серебро", 47, "107.868", "[Kr] 4d¹⁰ 5s¹", "переходный металл", [1]],
+      ["I", "Иод", 53, "126.904", "[Kr] 4d¹⁰ 5s² 5p⁵", "галоген", [1, 3, 5, 7]],
+      ["Ba", "Барий", 56, "137.327", "[Xe] 6s²", "щелочноземельный металл", [2]]
+    ].map(([symbol, name, z, mass, config, type, valences]) => ({ symbol, name, z, mass, config, type, valences }));
+
+    const historyEvents = [
+      [1914, "Мировые войны", "Начало Первой мировой войны", "Сараевское убийство и кризис союзов привели к общеевропейской войне.", "Показала разрушительную силу индустриальной войны и изменила карту Европы."],
+      [1917, "Ранний XX век", "Революции в России", "Февральские и Октябрьские события изменили политический строй страны.", "Повлияли на весь XX век: идеологии, гражданские войны, международные отношения."],
+      [1919, "Ранний XX век", "Версальский договор", "Мирный договор закрепил итоги Первой мировой войны.", "Создал новую систему международных отношений и противоречия межвоенного периода."],
+      [1929, "Ранний XX век", "Великая депрессия", "Мировой экономический кризис начался с обвала фондового рынка США.", "Усилил роль государства в экономике и политическую нестабильность."],
+      [1939, "Мировые войны", "Начало Второй мировой войны", "Нападение Германии на Польшу стало началом глобального конфликта.", "Война изменила баланс сил и привела к созданию ООН."],
+      [1945, "Мировые войны", "Окончание Второй мировой войны", "Капитуляция Германии и Японии завершила крупнейший конфликт.", "Начались деколонизация, холодная война и новая система безопасности."],
+      [1949, "Холодная война", "Создание НАТО", "Западные страны оформили военно-политический союз.", "Закрепило блоковое противостояние второй половины XX века."],
+      [1961, "Холодная война", "Полет Юрия Гагарина", "Первый человек совершил орбитальный космический полет.", "Символ научно-технической гонки и начала космической эры."],
+      [1962, "Холодная война", "Карибский кризис", "СССР и США оказались на грани ядерного конфликта.", "Показал необходимость переговоров и механизмов контроля вооружений."],
+      [1989, "Холодная война", "Падение Берлинской стены", "Граница между Восточным и Западным Берлином была открыта.", "Стало символом завершения холодной войны и объединения Германии."],
+      [1991, "Современность", "Распад СССР", "Союзные республики стали независимыми государствами.", "Изменил политическую карту Евразии и мировую систему сил."],
+      [2001, "Современность", "11 сентября", "Теракты в США стали шоком для мировой политики.", "Началась новая фаза борьбы с терроризмом и изменения в безопасности."],
+      [2008, "Современность", "Мировой финансовый кризис", "Кризис ипотечного рынка США перерос в глобальный спад.", "Показал взаимозависимость финансовых систем мира."],
+      [2020, "Современность", "Пандемия COVID-19", "Распространение вируса привело к ограничениям и перегрузке систем здравоохранения.", "Ускорила цифровизацию, дистанционное обучение и изменения в экономике."]
+    ].map(([year, era, title, context, meaning]) => ({ year, era, title, context, meaning }));
+
+    function escapeHTML(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function haptic(ms = 10) {
+      if (!state.haptics) return;
+      try {
+        if ("vibrate" in navigator) navigator.vibrate(ms);
+      } catch (error) {
+        /* Vibration is optional and must never block the UI. */
+      }
+    }
+
+    function showToast(title, text, type = "info", duration = 5200) {
+      const stack = document.getElementById("toastStack");
+      if (!stack) return;
+
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.dataset.type = type;
+
+      const icon = document.createElement("i");
+      icon.setAttribute("data-lucide", type === "error" ? "triangle-alert" : type === "success" ? "check-circle-2" : "info");
+      icon.setAttribute("aria-hidden", "true");
+      icon.style.color = type === "error" ? "var(--danger)" : type === "success" ? "var(--emerald)" : "var(--primary-strong)";
+
+      const body = document.createElement("div");
+      const heading = document.createElement("div");
+      heading.className = "toast-title";
+      heading.textContent = title;
+      const paragraph = document.createElement("div");
+      paragraph.className = "toast-text";
+      paragraph.textContent = text;
+      body.append(heading, paragraph);
+
+      const close = document.createElement("button");
+      close.className = "icon-button tap-button";
+      close.type = "button";
+      close.setAttribute("aria-label", "Закрыть уведомление");
+      close.style.width = "34px";
+      close.style.minWidth = "34px";
+      close.style.height = "34px";
+      const closeIcon = document.createElement("i");
+      closeIcon.setAttribute("data-lucide", "x");
+      closeIcon.setAttribute("aria-hidden", "true");
+      close.append(closeIcon);
+      close.addEventListener("click", () => toast.remove());
+
+      toast.append(icon, body, close);
+      stack.appendChild(toast);
+      refreshIcons();
+      window.setTimeout(() => toast.remove(), duration);
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons({ attrs: { width: 18, height: 18, "stroke-width": 2.2 } });
+      }
+    }
+
+    function applyTheme(theme) {
+      state.theme = theme === "light" ? "light" : "dark";
+      document.documentElement.classList.toggle("light", state.theme === "light");
+      document.documentElement.classList.toggle("dark", state.theme !== "light");
+      const meta = document.getElementById("themeColor");
+      if (meta) meta.setAttribute("content", state.theme === "light" ? "#f4f7fb" : "#0b0f17");
+
+      const iconName = state.theme === "light" ? "sun" : "moon";
+      const themeToggle = document.getElementById("themeToggle");
+      if (themeToggle) themeToggle.innerHTML = `<i data-lucide="${iconName}" aria-hidden="true"></i>`;
+
+      storage.set(STORAGE_KEYS.theme, state.theme);
+      refreshIcons();
+    }
+
+    function setRoute(route) {
+      const target = document.querySelector(`[data-view="${route}"]`);
+      if (!target) return;
+      state.route = route;
+      haptic();
+
+      document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.dataset.view === route);
+      });
+      document.querySelectorAll("[data-route]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.route === route);
+      });
+
+      if (route === "geo") {
+        initGlobe();
+        window.setTimeout(() => resizeGlobe(), 80);
+      }
+      if (route === "assistant") {
+        window.setTimeout(scrollChatToEnd, 80);
+      }
+    }
+
+    function updateToday() {
+      const target = document.getElementById("todayLine");
+      if (!target) return;
+      const formatter = new Intl.DateTimeFormat("ru-RU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      });
+      target.textContent = formatter.format(new Date());
+    }
+
+    function initNavigation() {
+      document.querySelectorAll("[data-route], [data-route-jump]").forEach((button) => {
+        button.addEventListener("click", () => setRoute(button.dataset.route || button.dataset.routeJump));
+      });
+
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest("button, a, input, select, textarea");
+        if (target && (target.matches("button") || target.matches("a"))) haptic(8);
+      });
+
+      const themeToggle = document.getElementById("themeToggle");
+      const themeModeButton = document.getElementById("themeModeButton");
+      [themeToggle, themeModeButton].forEach((button) => {
+        if (!button) return;
+        button.addEventListener("click", () => applyTheme(state.theme === "light" ? "dark" : "light"));
+      });
+
+      const installButton = document.getElementById("installButton");
+      let deferredInstall = null;
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstall = event;
+      });
+      installButton?.addEventListener("click", async () => {
+        if (!deferredInstall) {
+          showToast("Установка", "Откройте меню браузера и выберите добавление на главный экран.", "info");
+          return;
+        }
+        try {
+          deferredInstall.prompt();
+          await deferredInstall.userChoice;
+          deferredInstall = null;
+        } catch (error) {
+          showToast("Установка недоступна", "Браузер не разрешил показать системное окно установки.", "error");
+        }
+      });
+
+      document.getElementById("hapticsButton")?.addEventListener("click", () => {
+        state.haptics = !state.haptics;
+        storage.set(STORAGE_KEYS.haptics, state.haptics);
+        updateHapticsButton();
+        showToast("Тактильный отклик", state.haptics ? "Вибрация включена." : "Вибрация выключена.", "success");
+      });
+
+      document.getElementById("wipeDataButton")?.addEventListener("click", () => {
+        storage.remove(STORAGE_KEYS.chat);
+        storage.remove(STORAGE_KEYS.theme);
+        storage.remove(STORAGE_KEYS.haptics);
+        state.chat = [];
+        state.haptics = true;
+        applyTheme("dark");
+        updateHapticsButton();
+        renderChat();
+        showToast("Данные сброшены", "Локальная история и настройки очищены.", "success");
+      });
+    }
+
+    function updateHapticsButton() {
+      const button = document.getElementById("hapticsButton");
+      if (!button) return;
+      button.setAttribute("aria-pressed", String(state.haptics));
+      button.innerHTML = `<i data-lucide="activity" aria-hidden="true"></i>${state.haptics ? "Вкл" : "Выкл"}`;
+      refreshIcons();
+    }
+
+    let globe = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      controls: null,
+      earth: null,
+      clouds: null,
+      markers: [],
+      raycaster: null,
+      pointer: null,
+      animationId: null,
+      flight: null,
+      initialized: false
+    };
+
+    function initGlobe() {
+      if (globe.initialized) return;
+      const canvas = document.getElementById("globeCanvas");
+      const skeleton = document.getElementById("globeSkeleton");
+      if (!canvas) return;
+      if (!window.THREE || !window.THREE.OrbitControls) {
+        if (skeleton) skeleton.innerHTML = '<div class="max-w-sm text-center"><p class="text-lg font-extrabold">3D-модуль не загрузился</p><p class="mt-2 text-sm text-[var(--muted)]">Проверьте подключение к CDN и обновите страницу.</p></div>';
+        showToast("CDN недоступен", "Three.js или OrbitControls не загрузились. Остальные разделы продолжают работать.", "error");
+        return;
+      }
+
+      const wrap = canvas.parentElement;
+      globe.scene = new THREE.Scene();
+      globe.camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
+      globe.camera.position.set(0, 1.15, 6.2);
+
+      globe.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      globe.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      globe.renderer.setSize(wrap.clientWidth, wrap.clientHeight, false);
+
+      globe.controls = new THREE.OrbitControls(globe.camera, canvas);
+      globe.controls.enableDamping = true;
+      globe.controls.dampingFactor = 0.06;
+      globe.controls.rotateSpeed = 0.48;
+      globe.controls.zoomSpeed = 0.72;
+      globe.controls.enablePan = false;
+      globe.controls.minDistance = 3.2;
+      globe.controls.maxDistance = 8.8;
+      globe.controls.autoRotate = true;
+      globe.controls.autoRotateSpeed = 0.45;
+      globe.controls.addEventListener("start", () => {
+        globe.controls.autoRotate = false;
+      });
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.58);
+      globe.scene.add(ambient);
+      const sun = new THREE.DirectionalLight(0xffffff, 1.18);
+      sun.position.set(-4, 3, 4);
+      globe.scene.add(sun);
+      const rim = new THREE.PointLight(0x6366f1, 1.4, 9);
+      rim.position.set(3.2, 2.2, -3.2);
+      globe.scene.add(rim);
+
+      createStars();
+      createEarth();
+      createMarkers();
+
+      globe.raycaster = new THREE.Raycaster();
+      globe.pointer = new THREE.Vector2();
+      canvas.addEventListener("pointerdown", onGlobePointerDown);
+      window.addEventListener("resize", resizeGlobe);
+      globe.initialized = true;
+      animateGlobe();
+
+      window.setTimeout(() => {
+        state.globeReady = true;
+        skeleton?.classList.add("hidden");
+      }, 650);
+    }
+
+    function createStars() {
+      const geometry = new THREE.BufferGeometry();
+      const points = [];
+      for (let i = 0; i < 900; i += 1) {
+        const radius = 12 + Math.random() * 18;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        points.push(
+          radius * Math.sin(phi) * Math.cos(theta),
+          radius * Math.cos(phi),
+          radius * Math.sin(phi) * Math.sin(theta)
+        );
+      }
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+      const material = new THREE.PointsMaterial({
+        color: 0xa7f3d0,
+        size: 0.035,
+        transparent: true,
+        opacity: 0.78
+      });
+      globe.scene.add(new THREE.Points(geometry, material));
+    }
+
+    function createEarth() {
+      const geometry = new THREE.SphereGeometry(2, 96, 96);
+      const fallbackTexture = new THREE.CanvasTexture(makeEarthTexture());
+      fallbackTexture.anisotropy = 8;
+      const material = new THREE.MeshPhongMaterial({
+        map: fallbackTexture,
+        shininess: 12,
+        specular: new THREE.Color(0x1d4ed8)
+      });
+      globe.earth = new THREE.Mesh(geometry, material);
+      globe.scene.add(globe.earth);
+
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(
+        "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg",
+        (texture) => {
+          texture.anisotropy = 8;
+          globe.earth.material.map = texture;
+          globe.earth.material.needsUpdate = true;
+        },
+        undefined,
+        () => {
+          showToast("Карта Земли", "Внешняя текстура не загрузилась, включена встроенная резервная карта.", "info");
+        }
+      );
+
+      const cloudGeometry = new THREE.SphereGeometry(2.035, 96, 96);
+      const cloudTexture = new THREE.CanvasTexture(makeCloudTexture());
+      const cloudMaterial = new THREE.MeshLambertMaterial({
+        map: cloudTexture,
+        transparent: true,
+        opacity: 0.24,
+        depthWrite: false
+      });
+      globe.clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      globe.scene.add(globe.clouds);
+    }
+
+    function makeEarthTexture() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext("2d");
+      const ocean = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      ocean.addColorStop(0, "#0f3b76");
+      ocean.addColorStop(0.5, "#0b5a86");
+      ocean.addColorStop(1, "#0f2b55");
+      ctx.fillStyle = ocean;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "rgba(20, 120, 86, 0.88)";
+      const blobs = [
+        [250, 175, 170, 70, -0.25],
+        [315, 250, 120, 145, 0.32],
+        [510, 175, 145, 70, -0.12],
+        [565, 255, 90, 140, 0.18],
+        [710, 205, 180, 86, 0.08],
+        [800, 312, 100, 62, 0.25],
+        [872, 380, 92, 54, -0.18]
+      ];
+      blobs.forEach(([x, y, rx, ry, rot]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.fillStyle = "rgba(241, 245, 249, 0.9)";
+      ctx.fillRect(0, 0, canvas.width, 34);
+      ctx.fillRect(0, canvas.height - 38, canvas.width, 38);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= canvas.width; x += 64) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= canvas.height; y += 64) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      return canvas;
+    }
+
+    function makeCloudTexture() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < 80; i += 1) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const rx = 18 + Math.random() * 52;
+        const ry = 6 + Math.random() * 18;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((Math.random() - 0.5) * 0.8);
+        ctx.fillStyle = `rgba(255,255,255,${0.08 + Math.random() * 0.18})`;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      return canvas;
+    }
+
+    function createMarkers() {
+      const markerGeometry = new THREE.SphereGeometry(0.045, 18, 18);
+      countries.forEach((country) => {
+        const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.position.copy(latLonToVector(country.lat, country.lon, 2.09));
+        marker.userData.country = country.name;
+        globe.scene.add(marker);
+
+        const haloGeometry = new THREE.RingGeometry(0.065, 0.092, 24);
+        const haloMaterial = new THREE.MeshBasicMaterial({
+          color: 0x6366f1,
+          transparent: true,
+          opacity: 0.72,
+          side: THREE.DoubleSide
+        });
+        const halo = new THREE.Mesh(haloGeometry, haloMaterial);
+        halo.position.copy(latLonToVector(country.lat, country.lon, 2.095));
+        halo.lookAt(new THREE.Vector3(0, 0, 0));
+        halo.userData.country = country.name;
+        globe.scene.add(halo);
+        globe.markers.push(marker, halo);
+      });
+    }
+
+    function latLonToVector(lat, lon, radius) {
+      const phi = (90 - lat) * Math.PI / 180;
+      const theta = (lon + 180) * Math.PI / 180;
+      return new THREE.Vector3(
+        -radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.sin(theta)
+      );
+    }
+
+    function resizeGlobe() {
+      if (!globe.initialized || !globe.renderer || !globe.camera) return;
+      const canvas = document.getElementById("globeCanvas");
+      if (!canvas || !canvas.parentElement) return;
+      const wrap = canvas.parentElement;
+      const width = Math.max(320, wrap.clientWidth);
+      const height = Math.max(360, wrap.clientHeight);
+      globe.camera.aspect = width / height;
+      globe.camera.updateProjectionMatrix();
+      globe.renderer.setSize(width, height, false);
+    }
+
+    function animateGlobe(time = 0) {
+      if (!globe.initialized) return;
+      globe.animationId = requestAnimationFrame(animateGlobe);
+
+      if (globe.clouds) globe.clouds.rotation.y += 0.00055;
+      if (globe.flight) updateCameraFlight(time);
+      globe.controls.update();
+      globe.renderer.render(globe.scene, globe.camera);
+    }
+
+    function updateCameraFlight(time) {
+      const flight = globe.flight;
+      if (!flight.started) flight.started = time;
+      const t = Math.min(1, (time - flight.started) / flight.duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      globe.camera.position.lerpVectors(flight.from, flight.to, eased);
+      globe.controls.target.lerpVectors(flight.targetFrom, flight.targetTo, eased);
+      if (t >= 1) {
+        globe.flight = null;
+        globe.controls.autoRotate = false;
+      }
+    }
+
+    function onGlobePointerDown(event) {
+      if (!globe.raycaster || !globe.camera) return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      globe.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      globe.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      globe.raycaster.setFromCamera(globe.pointer, globe.camera);
+      const hits = globe.raycaster.intersectObjects(globe.markers, false);
+      if (!hits.length) return;
+      const countryName = hits[0].object.userData.country;
+      const country = countries.find((item) => item.name === countryName);
+      if (country) selectCountry(country);
+    }
+
+    function selectCountry(country) {
+      state.selectedCountry = country.name;
+      haptic(12);
+      updateCountrySheet(country);
+      flyToCountry(country);
+      const input = document.getElementById("countrySearch");
+      if (input) input.value = country.name;
+      document.getElementById("countrySuggestions")?.setAttribute("hidden", "");
+    }
+
+    function flyToCountry(country) {
+      if (!globe.initialized) return;
+      const direction = latLonToVector(country.lat, country.lon, 1).normalize();
+      const to = direction.clone().multiplyScalar(4.5);
+      to.y += 0.45;
+      globe.flight = {
+        from: globe.camera.position.clone(),
+        to,
+        targetFrom: globe.controls.target.clone(),
+        targetTo: direction.clone().multiplyScalar(0.45),
+        duration: 1000,
+        started: 0
+      };
+      globe.controls.autoRotate = false;
+    }
+
+    function updateCountrySheet(country) {
+      const details = document.getElementById("countryDetails");
+      const sheet = document.getElementById("countrySheet");
+      if (!details || !sheet) return;
+      details.innerHTML = `
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span class="chip"><i data-lucide="map-pin" aria-hidden="true"></i>${escapeHTML(country.name)}</span>
+          <span class="chip"><i data-lucide="landmark" aria-hidden="true"></i>${escapeHTML(country.capital)}</span>
+        </div>
+        <h3 class="text-2xl font-black">${escapeHTML(country.name)}</h3>
+        <p class="mt-1 text-sm leading-6 text-[var(--muted)]">${escapeHTML(country.note)}</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Население</p><p class="mt-1 font-extrabold">${escapeHTML(country.population)}</p></div>
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">ВВП</p><p class="mt-1 font-extrabold">${escapeHTML(country.gdp)}</p></div>
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Климат</p><p class="mt-1 text-sm leading-5">${escapeHTML(country.climate)}</p></div>
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Отрасли</p><p class="mt-1 text-sm leading-5">${escapeHTML(country.industries)}</p></div>
+        </div>
+      `;
+      sheet.classList.add("open");
+      refreshIcons();
+    }
+
+    function initCountrySearch() {
+      const input = document.getElementById("countrySearch");
+      const suggestions = document.getElementById("countrySuggestions");
+      if (!input || !suggestions) return;
+      input.addEventListener("input", () => {
+        const query = input.value.trim().toLowerCase();
+        suggestions.innerHTML = "";
+        if (!query) {
+          suggestions.hidden = true;
+          return;
+        }
+        const matches = countries.filter((country) => country.name.toLowerCase().includes(query)).slice(0, 5);
+        if (!matches.length) {
+          const empty = document.createElement("div");
+          empty.className = "px-3 py-3 text-sm text-[var(--muted)]";
+          empty.textContent = "Страна не найдена";
+          suggestions.appendChild(empty);
+          suggestions.hidden = false;
+          return;
+        }
+        matches.forEach((country) => {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className = "suggestion-row tap-button";
+          const name = document.createElement("span");
+          name.className = "font-bold";
+          name.textContent = country.name;
+          const capital = document.createElement("span");
+          capital.className = "text-sm text-[var(--muted)]";
+          capital.textContent = country.capital;
+          row.append(name, capital);
+          row.addEventListener("click", () => selectCountry(country));
+          suggestions.appendChild(row);
+        });
+        suggestions.hidden = false;
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        const query = input.value.trim().toLowerCase();
+        const country = countries.find((item) => item.name.toLowerCase().includes(query));
+        if (country) selectCountry(country);
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("#countrySearch") && !event.target.closest("#countrySuggestions")) {
+          suggestions.hidden = true;
+        }
+      });
+
+      document.querySelectorAll("[data-country-quick]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setRoute("geo");
+          window.setTimeout(() => {
+            const country = countries.find((item) => item.name === button.dataset.countryQuick);
+            if (country) selectCountry(country);
+          }, 160);
+        });
+      });
+
+      document.getElementById("closeCountrySheet")?.addEventListener("click", () => {
+        document.getElementById("countrySheet")?.classList.remove("open");
+      });
+
+      document.getElementById("resetGlobe")?.addEventListener("click", () => {
+        if (!globe.initialized) return;
+        globe.flight = {
+          from: globe.camera.position.clone(),
+          to: new THREE.Vector3(0, 1.15, 6.2),
+          targetFrom: globe.controls.target.clone(),
+          targetTo: new THREE.Vector3(0, 0, 0),
+          duration: 900,
+          started: 0
+        };
+        globe.controls.autoRotate = true;
+        document.getElementById("countrySheet")?.classList.remove("open");
+      });
+    }
+
+    function renderLatex(formula, displayMode = true) {
+      if (window.katex && typeof window.katex.renderToString === "function") {
+        try {
+          return window.katex.renderToString(formula, { throwOnError: false, displayMode });
+        } catch (error) {
+          return `<code>${escapeHTML(formula)}</code>`;
+        }
+      }
+      return `<code>${escapeHTML(formula)}</code>`;
+    }
+
+    function initAlgebra() {
+      document.getElementById("solveButton")?.addEventListener("click", solveAlgebra);
+      document.querySelectorAll("[data-algebra-example]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setRoute("algebra");
+          const input = document.getElementById("algebraInput");
+          const type = document.getElementById("algebraType");
+          if (input) input.value = button.dataset.algebraExample || "";
+          if (type) type.value = button.dataset.algebraType || "quadratic";
+          window.setTimeout(solveAlgebra, 120);
+        });
+      });
+      solveAlgebra();
+    }
+
+    function solveAlgebra() {
+      const content = document.getElementById("notebookContent");
+      const input = document.getElementById("algebraInput");
+      const type = document.getElementById("algebraType");
+      if (!content || !input || !type) return;
+      haptic(8);
+      content.innerHTML = `
+        <div class="skeleton h-6 w-2/3"></div>
+        <div class="skeleton mt-6 h-24 w-full"></div>
+        <div class="skeleton mt-4 h-20 w-11/12"></div>
+        <div class="skeleton mt-4 h-16 w-10/12"></div>
+      `;
+      window.setTimeout(() => {
+        const task = input.value.trim();
+        let result;
+        if (type.value === "quadratic") result = solveQuadratic(task);
+        if (type.value === "trig") result = solveTrig(task);
+        if (type.value === "derivative") result = solveDerivative(task);
+        renderNotebook(result || makeErrorResult("Не удалось определить тип задачи."));
+      }, 260);
+    }
+
+    function renderNotebook(result) {
+      const content = document.getElementById("notebookContent");
+      if (!content) return;
+      content.innerHTML = "";
+      const title = document.createElement("div");
+      title.className = "mb-4";
+      const h3 = document.createElement("h3");
+      h3.className = "text-xl font-black";
+      h3.textContent = result.title;
+      const subtitle = document.createElement("p");
+      subtitle.className = "mt-1 text-sm leading-6";
+      subtitle.textContent = result.summary;
+      title.append(h3, subtitle);
+      content.appendChild(title);
+
+      result.steps.forEach((step, index) => {
+        const row = document.createElement("div");
+        row.className = "step-row";
+        const stepTitle = document.createElement("div");
+        stepTitle.className = "step-title";
+        stepTitle.textContent = `Шаг ${index + 1}: ${step.label}`;
+        const explanation = document.createElement("p");
+        explanation.className = "mb-2 leading-6";
+        explanation.textContent = step.text;
+        row.append(stepTitle, explanation);
+        if (step.formula) {
+          const formula = document.createElement("div");
+          formula.className = "formula-box";
+          formula.innerHTML = renderLatex(step.formula, true);
+          row.appendChild(formula);
+        }
+        content.appendChild(row);
+      });
+    }
+
+    function makeErrorResult(text) {
+      return {
+        title: "Нужен другой формат",
+        summary: text,
+        steps: [
+          {
+            label: "Проверь запись",
+            text: "Попробуйте пример из подсказок или запишите выражение через x, степени и знак равенства.",
+            formula: "\\text{например: } x^2 - 5x + 6 = 0"
+          }
+        ]
+      };
+    }
+
+    function parsePolynomial(expression) {
+      const normalized = expression
+        .toLowerCase()
+        .replace(/[−–—]/g, "-")
+        .replace(/\s+/g, "")
+        .replace(/\*/g, "")
+        .replace(/,/g, ".");
+      const parts = normalized.replace(/-/g, "+-").split("+").filter(Boolean);
+      const terms = [];
+      parts.forEach((part) => {
+        if (!part) return;
+        if (part.includes("x")) {
+          const coeffRaw = part.split("x")[0];
+          let coefficient = 1;
+          if (coeffRaw === "-") coefficient = -1;
+          else if (coeffRaw && coeffRaw !== "+") coefficient = Number(coeffRaw);
+          let power = 1;
+          const powerMatch = part.match(/x\^(-?\d+)/);
+          if (powerMatch) power = Number(powerMatch[1]);
+          if (Number.isFinite(coefficient) && Number.isFinite(power)) terms.push({ coefficient, power });
+        } else {
+          const constant = Number(part);
+          if (Number.isFinite(constant)) terms.push({ coefficient: constant, power: 0 });
+        }
+      });
+      return terms;
+    }
+
+    function combineTerms(terms) {
+      return terms.reduce((acc, term) => {
+        acc[term.power] = (acc[term.power] || 0) + term.coefficient;
+        return acc;
+      }, {});
+    }
+
+    function parseEquationToPolynomial(task) {
+      const [leftRaw, rightRaw = "0"] = task.split("=");
+      const left = parsePolynomial(leftRaw || "");
+      const right = parsePolynomial(rightRaw || "").map((term) => ({ coefficient: -term.coefficient, power: term.power }));
+      return combineTerms([...left, ...right]);
+    }
+
+    function fmtNumber(value) {
+      if (Math.abs(value) < 1e-9) return "0";
+      if (Number.isInteger(value)) return String(value);
+      return Number(value.toFixed(4)).toString().replace(".", ",");
+    }
+
+    function signed(value) {
+      if (value < 0) return `- ${fmtNumber(Math.abs(value))}`;
+      return `+ ${fmtNumber(value)}`;
+    }
+
+    function solveQuadratic(task) {
+      const poly = parseEquationToPolynomial(task);
+      const a = poly[2] || 0;
+      const b = poly[1] || 0;
+      const c = poly[0] || 0;
+      if (!a) return makeErrorResult("В квадратном уравнении коэффициент при x^2 не должен быть равен нулю.");
+      const d = b * b - 4 * a * c;
+      const steps = [
+        {
+          label: "Приведем к стандартному виду",
+          text: "Квадратное уравнение записываем как ax² + bx + c = 0 и выделяем коэффициенты.",
+          formula: `${fmtNumber(a)}x^2 ${signed(b)}x ${signed(c)} = 0,\\quad a=${fmtNumber(a)},\\ b=${fmtNumber(b)},\\ c=${fmtNumber(c)}`
+        },
+        {
+          label: "Найдем дискриминант",
+          text: "Дискриминант показывает, сколько действительных корней имеет уравнение.",
+          formula: `D=b^2-4ac=(${fmtNumber(b)})^2-4\\cdot ${fmtNumber(a)}\\cdot ${fmtNumber(c)}=${fmtNumber(d)}`
+        }
+      ];
+
+      if (d < 0) {
+        steps.push({
+          label: "Сделаем вывод",
+          text: "Дискриминант меньше нуля, поэтому действительных корней нет.",
+          formula: `D<0\\Rightarrow x\\notin \\mathbb{R}`
+        });
+      } else if (Math.abs(d) < 1e-9) {
+        const x = -b / (2 * a);
+        steps.push({
+          label: "Вычислим единственный корень",
+          text: "Если дискриминант равен нулю, оба корня совпадают.",
+          formula: `x=\\frac{-b}{2a}=\\frac{-(${fmtNumber(b)})}{2\\cdot ${fmtNumber(a)}}=${fmtNumber(x)}`
+        });
+      } else {
+        const sqrtD = Math.sqrt(d);
+        const x1 = (-b + sqrtD) / (2 * a);
+        const x2 = (-b - sqrtD) / (2 * a);
+        steps.push({
+          label: "Подставим в формулу корней",
+          text: "При положительном дискриминанте получаем два действительных корня.",
+          formula: `x_{1,2}=\\frac{-b\\pm\\sqrt{D}}{2a}=\\frac{-(${fmtNumber(b)})\\pm\\sqrt{${fmtNumber(d)}}}{2\\cdot ${fmtNumber(a)}}`
+        });
+        steps.push({
+          label: "Запишем ответ",
+          text: "Уравнение решено: найденные значения обращают левую часть в ноль.",
+          formula: `x_1=${fmtNumber(x1)},\\quad x_2=${fmtNumber(x2)}`
+        });
+      }
+
+      return {
+        title: "Квадратное уравнение",
+        summary: "Разбор через коэффициенты, дискриминант и формулу корней.",
+        steps
+      };
+    }
+
+    function parseTrigValue(raw) {
+      const value = raw
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/,/g, ".")
+        .replace(/sqrt/g, "√");
+      const known = {
+        "0": { numeric: 0, latex: "0", alphaSin: "0", alphaCos: "\\frac{\\pi}{2}" },
+        "1": { numeric: 1, latex: "1", alphaSin: "\\frac{\\pi}{2}", alphaCos: "0" },
+        "-1": { numeric: -1, latex: "-1", alphaSin: "-\\frac{\\pi}{2}", alphaCos: "\\pi" },
+        "1/2": { numeric: 0.5, latex: "\\frac{1}{2}", alphaSin: "\\frac{\\pi}{6}", alphaCos: "\\frac{\\pi}{3}" },
+        "-1/2": { numeric: -0.5, latex: "-\\frac{1}{2}", alphaSin: "-\\frac{\\pi}{6}", alphaCos: "\\frac{2\\pi}{3}" },
+        "√2/2": { numeric: Math.SQRT2 / 2, latex: "\\frac{\\sqrt{2}}{2}", alphaSin: "\\frac{\\pi}{4}", alphaCos: "\\frac{\\pi}{4}" },
+        "-√2/2": { numeric: -Math.SQRT2 / 2, latex: "-\\frac{\\sqrt{2}}{2}", alphaSin: "-\\frac{\\pi}{4}", alphaCos: "\\frac{3\\pi}{4}" },
+        "√3/2": { numeric: Math.sqrt(3) / 2, latex: "\\frac{\\sqrt{3}}{2}", alphaSin: "\\frac{\\pi}{3}", alphaCos: "\\frac{\\pi}{6}" },
+        "-√3/2": { numeric: -Math.sqrt(3) / 2, latex: "-\\frac{\\sqrt{3}}{2}", alphaSin: "-\\frac{\\pi}{3}", alphaCos: "\\frac{5\\pi}{6}" }
+      };
+      if (known[value]) return known[value];
+      if (value.includes("/")) {
+        const [n, d] = value.split("/").map(Number);
+        if (Number.isFinite(n) && Number.isFinite(d) && d !== 0) {
+          const numeric = n / d;
+          return { numeric, latex: `\\frac{${fmtNumber(n)}}{${fmtNumber(d)}}`, alphaSin: "\\arcsin a", alphaCos: "\\arccos a" };
+        }
+      }
+      const numeric = Number(value);
+      if (Number.isFinite(numeric)) return { numeric, latex: fmtNumber(numeric), alphaSin: "\\arcsin a", alphaCos: "\\arccos a" };
+      return null;
+    }
+
+    function solveTrig(task) {
+      const normalized = task.toLowerCase().replace(/[−–—]/g, "-").replace(/\s+/g, "");
+      const match = normalized.match(/(sin|cos|tg|tan)x=([^=]+)/);
+      if (!match) return makeErrorResult("Для тригонометрии используйте формат sin x = 1/2 или cos x = √2/2.");
+      const fn = match[1] === "tan" ? "tg" : match[1];
+      const parsed = parseTrigValue(match[2]);
+      if (!parsed || Math.abs(parsed.numeric) > 1 && fn !== "tg") {
+        return makeErrorResult("Для sin и cos правая часть должна лежать в промежутке от -1 до 1.");
+      }
+      const fnLatex = fn === "tg" ? "\\tan" : `\\${fn}`;
+      const steps = [
+        {
+          label: "Определим тип уравнения",
+          text: "Это простейшее тригонометрическое уравнение. Сначала находим опорный угол.",
+          formula: `${fnLatex}x=${parsed.latex}`
+        }
+      ];
+
+      if (fn === "sin") {
+        steps.push({
+          label: "Найдем опорный угол",
+          text: "Для синуса используем угол α, значение синуса которого равно правой части.",
+          formula: `\\alpha=${parsed.alphaSin},\\quad \\sin \\alpha=${parsed.latex}`
+        });
+        steps.push({
+          label: "Запишем общее решение",
+          text: "Синус повторяется через π с чередованием знака угла.",
+          formula: `x=(-1)^n\\alpha+\\pi n,\\quad n\\in\\mathbb{Z}`
+        });
+        steps.push({
+          label: "Подставим значение α",
+          text: "Так получаем все решения уравнения, а не только один угол.",
+          formula: `x=(-1)^n\\cdot ${parsed.alphaSin}+\\pi n,\\quad n\\in\\mathbb{Z}`
+        });
+      } else if (fn === "cos") {
+        steps.push({
+          label: "Найдем опорный угол",
+          text: "Для косинуса берем угол α из промежутка от 0 до π.",
+          formula: `\\alpha=${parsed.alphaCos},\\quad \\cos \\alpha=${parsed.latex}`
+        });
+        steps.push({
+          label: "Запишем общее решение",
+          text: "Косинус симметричен относительно оси Ox, поэтому появляются два направления.",
+          formula: `x=\\pm\\alpha+2\\pi n,\\quad n\\in\\mathbb{Z}`
+        });
+        steps.push({
+          label: "Подставим значение α",
+          text: "Ответ задает все углы, у которых косинус равен заданному числу.",
+          formula: `x=\\pm ${parsed.alphaCos}+2\\pi n,\\quad n\\in\\mathbb{Z}`
+        });
+      } else {
+        steps.push({
+          label: "Используем период тангенса",
+          text: "Тангенс имеет период π, поэтому к одному решению добавляем πn.",
+          formula: `x=\\arctan(${parsed.latex})+\\pi n,\\quad n\\in\\mathbb{Z}`
+        });
+      }
+
+      return {
+        title: "Тригонометрическое уравнение",
+        summary: "Разбор показывает опорный угол, периодичность и общий ответ.",
+        steps
+      };
+    }
+
+    function termToLatex(coefficient, power) {
+      if (Math.abs(coefficient) < 1e-9) return "";
+      const absCoeff = Math.abs(coefficient);
+      const coeff = absCoeff === 1 && power !== 0 ? "" : fmtNumber(absCoeff);
+      if (power === 0) return coeff || "1";
+      if (power === 1) return `${coeff}x`;
+      return `${coeff}x^${power}`;
+    }
+
+    function derivativeToLatex(terms) {
+      const pieces = terms
+        .filter((term) => Math.abs(term.coefficient) > 1e-9)
+        .sort((a, b) => b.power - a.power)
+        .map((term, index) => {
+          const body = termToLatex(term.coefficient, term.power);
+          if (!body) return "";
+          if (term.coefficient < 0) return `${index === 0 ? "-" : "-"} ${body}`;
+          return `${index === 0 ? "" : "+"} ${body}`;
+        })
+        .filter(Boolean);
+      return pieces.join(" ").trim() || "0";
+    }
+
+    function solveDerivative(task) {
+      const cleaned = task
+        .replace(/f\s*\(x\)\s*=/i, "")
+        .replace(/y\s*=/i, "")
+        .trim();
+
+      const lowered = cleaned.toLowerCase().replace(/\s+/g, "");
+      if (/^sin\(?(x)\)?$/.test(lowered) || lowered === "sinx") {
+        return {
+          title: "Производная функции",
+          summary: "Используем таблицу производных для тригонометрической функции.",
+          steps: [
+            { label: "Запишем функцию", text: "Функция равна синусу аргумента x.", formula: "f(x)=\\sin x" },
+            { label: "Применим табличную формулу", text: "Производная синуса равна косинусу.", formula: "(\\sin x)'=\\cos x" },
+            { label: "Ответ", text: "Получаем производную функции.", formula: "f'(x)=\\cos x" }
+          ]
+        };
+      }
+      if (/^cos\(?(x)\)?$/.test(lowered) || lowered === "cosx") {
+        return {
+          title: "Производная функции",
+          summary: "Используем таблицу производных для тригонометрической функции.",
+          steps: [
+            { label: "Запишем функцию", text: "Функция равна косинусу аргумента x.", formula: "f(x)=\\cos x" },
+            { label: "Применим табличную формулу", text: "Производная косинуса равна минус синусу.", formula: "(\\cos x)'=-\\sin x" },
+            { label: "Ответ", text: "Получаем производную функции.", formula: "f'(x)=-\\sin x" }
+          ]
+        };
+      }
+
+      const terms = parsePolynomial(cleaned);
+      if (!terms.length) return makeErrorResult("Для производной введите многочлен, например 3x^3 - 2x^2 + 7x - 4.");
+      const derivativeTerms = terms
+        .filter((term) => term.power > 0)
+        .map((term) => ({ coefficient: term.coefficient * term.power, power: term.power - 1 }));
+      const original = derivativeToLatex(terms);
+      const derivative = derivativeToLatex(derivativeTerms);
+
+      return {
+        title: "Производная многочлена",
+        summary: "Каждый член многочлена дифференцируем отдельно по правилу степени.",
+        steps: [
+          {
+            label: "Запишем функцию",
+            text: "Сначала приводим выражение к сумме степенных функций.",
+            formula: `f(x)=${original}`
+          },
+          {
+            label: "Используем правило степени",
+            text: "Если f(x)=ax^n, то производная равна a·n·x^(n-1). Константа исчезает.",
+            formula: `(ax^n)'=a\\cdot n\\cdot x^{n-1},\\quad C'=0`
+          },
+          {
+            label: "Дифференцируем каждый член",
+            text: "Складываем производные отдельных слагаемых.",
+            formula: `f'(x)=${derivative}`
+          },
+          {
+            label: "Ответ",
+            text: "Это итоговая скорость изменения исходной функции.",
+            formula: `\\boxed{f'(x)=${derivative}}`
+          }
+        ]
+      };
+    }
+
+    function initChat() {
+      renderChat();
+      updateApiStatus();
+      const form = document.getElementById("chatForm");
+      const input = document.getElementById("chatInput");
+      const debouncedSubmit = debounce(() => {
+        handleChatSubmit();
+      }, 180);
+      form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        debouncedSubmit();
+      });
+      input?.addEventListener("input", updateSendButton);
+      input?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          handleChatSubmit();
+        }
+      });
+      document.getElementById("clearChatButton")?.addEventListener("click", () => {
+        state.chat = [];
+        storage.set(STORAGE_KEYS.chat, state.chat);
+        renderChat();
+        showToast("Чат очищен", "История удалена с этого устройства.", "success");
+      });
+      document.querySelectorAll("[data-chat-prompt]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setRoute("assistant");
+          const chatInput = document.getElementById("chatInput");
+          if (chatInput) {
+            chatInput.value = button.dataset.chatPrompt || "";
+            chatInput.focus();
+            updateSendButton();
+          }
+        });
+      });
+      updateSendButton();
+    }
+
+    function debounce(fn, delay) {
+      let timer = null;
+      return function debounced(...args) {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    function updateApiStatus() {
+      const hasKey = Boolean(GEMINI_API_KEY && GEMINI_API_KEY.trim().length > 12 && !GEMINI_API_KEY.includes("PASTE"));
+      const label = document.getElementById("apiStatusLabel");
+      const text = document.getElementById("apiStatusText");
+      const dot = document.getElementById("apiStatusDot");
+      if (!label || !text || !dot) return;
+      if (hasKey) {
+        label.textContent = "Готово";
+        text.textContent = "Запросы будут отправляться в Gemini Flash через fetch.";
+        dot.classList.remove("danger-dot");
+      } else {
+        label.textContent = "Без ключа";
+        text.textContent = "Включен офлайн-режим: секретный ключ не встроен в публичный файл.";
+        dot.classList.add("danger-dot");
+      }
+    }
+
+    function updateSendButton() {
+      const input = document.getElementById("chatInput");
+      const button = document.getElementById("sendButton");
+      if (!button || !input) return;
+      const coolingDown = Date.now() - state.lastSendAt < 1400;
+      button.disabled = state.aiBusy || coolingDown || !input.value.trim();
+      if (coolingDown && !state.aiBusy) {
+        window.setTimeout(updateSendButton, 160);
+      }
+    }
+
+    function addChatMessage(message) {
+      state.chat.push(message);
+      if (state.chat.length > 48) state.chat = state.chat.slice(-48);
+      storage.set(STORAGE_KEYS.chat, state.chat);
+      renderChat();
+    }
+
+    function renderChat() {
+      const root = document.getElementById("chatMessages");
+      if (!root) return;
+      root.innerHTML = "";
+      if (!state.chat.length) {
+        const empty = document.createElement("div");
+        empty.className = "grid h-full place-items-center p-8 text-center text-[var(--muted)]";
+        empty.textContent = "История пуста. Задайте вопрос по уроку или попросите схему.";
+        root.appendChild(empty);
+        return;
+      }
+
+      state.chat.forEach((message) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${message.role === "user" ? "user" : "assistant"}`;
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = message.text || "";
+        const meta = document.createElement("div");
+        meta.className = "message-meta";
+        meta.textContent = `${message.role === "user" ? "Вы" : "Ассистент"} · ${formatTime(message.ts)}`;
+        wrapper.append(bubble, meta);
+
+        if (message.image && message.image.src) {
+          const imageWrap = document.createElement("div");
+          imageWrap.className = "chat-image";
+          const image = document.createElement("img");
+          image.loading = "lazy";
+          image.referrerPolicy = "no-referrer";
+          image.alt = message.image.alt || "Учебная иллюстрация";
+          image.src = message.image.src;
+          image.addEventListener("error", () => {
+            imageWrap.remove();
+            showToast("Иллюстрация недоступна", "Фотобанк не вернул изображение. Попробуйте другой запрос.", "error");
+          }, { once: true });
+          imageWrap.appendChild(image);
+          wrapper.appendChild(imageWrap);
+        }
+        root.appendChild(wrapper);
+      });
+      scrollChatToEnd();
+    }
+
+    function formatTime(ts) {
+      try {
+        return new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" }).format(new Date(ts || Date.now()));
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function scrollChatToEnd() {
+      const root = document.getElementById("chatMessages");
+      if (root) root.scrollTop = root.scrollHeight;
+    }
+
+    function addAssistantSkeleton() {
+      const root = document.getElementById("chatMessages");
+      if (!root) return null;
+      const wrapper = document.createElement("div");
+      wrapper.className = "message assistant";
+      wrapper.dataset.skeleton = "true";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = `
+        <div class="skeleton h-4 w-11/12"></div>
+        <div class="skeleton mt-3 h-4 w-9/12"></div>
+        <div class="skeleton mt-3 h-4 w-7/12"></div>
+      `;
+      wrapper.appendChild(bubble);
+      root.appendChild(wrapper);
+      scrollChatToEnd();
+      return wrapper;
+    }
+
+    async function handleChatSubmit() {
+      const input = document.getElementById("chatInput");
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      const now = Date.now();
+      if (state.aiBusy) return;
+      if (now - state.lastSendAt < 1400) {
+        showToast("Слишком быстро", "Подождите секунду перед следующим сообщением, чтобы не расходовать лимиты API.", "info");
+        return;
+      }
+
+      state.aiBusy = true;
+      state.lastSendAt = now;
+      updateSendButton();
+      input.value = "";
+      addChatMessage({ role: "user", text, ts: now });
+      const skeleton = addAssistantSkeleton();
+
+      try {
+        const assistantMessage = await askAssistant(text);
+        skeleton?.remove();
+        addChatMessage(assistantMessage);
+      } catch (error) {
+        skeleton?.remove();
+        const friendly = describeApiError(error);
+        showToast(friendly.title, friendly.message, "error");
+        addChatMessage({
+          role: "assistant",
+          text: friendly.chatText,
+          ts: Date.now()
+        });
+      } finally {
+        state.aiBusy = false;
+        updateSendButton();
+        input.focus();
+      }
+    }
+
+    async function askAssistant(text) {
+      const hasKey = Boolean(GEMINI_API_KEY && GEMINI_API_KEY.trim().length > 12 && !GEMINI_API_KEY.includes("PASTE"));
+      if (!hasKey) {
+        await wait(720);
+        const imageQuery = wantsImage(text) ? makeImageQuery(text) : "";
+        const answer = makeOfflineAnswer(text, imageQuery);
+        const message = { role: "assistant", text: answer, ts: Date.now() };
+        if (imageQuery) {
+          message.image = makeUnsplashImage(imageQuery);
+        }
+        showToast("Офлайн-режим", "Gemini API не вызван: секретный ключ не встроен в публичный HTML.", "info");
+        return message;
+      }
+
+      const response = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [
+              {
+                text: "Ты дружелюбный русскоязычный учебный ассистент для 10 класса. Отвечай кратко, по шагам, без HTML. Если ученик просит картинку, схему или иллюстрацию, добавь последней отдельной строкой IMAGE_QUERY: и 3-6 английских слов для фотобанка."
+              }
+            ]
+          },
+          contents: buildGeminiHistory(text),
+          generationConfig: {
+            temperature: 0.65,
+            topP: 0.9,
+            maxOutputTokens: 760
+          }
+        })
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch (error) {
+        payload = null;
+      }
+      if (!response.ok) {
+        const apiError = new Error(payload?.error?.message || "Gemini API вернул ошибку.");
+        apiError.status = response.status;
+        throw apiError;
+      }
+      const raw = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("\n").trim();
+      if (!raw) {
+        const emptyError = new Error("Gemini вернул пустой ответ.");
+        emptyError.status = 204;
+        throw emptyError;
+      }
+
+      const parsed = extractImageQuery(raw);
+      const message = {
+        role: "assistant",
+        text: parsed.text,
+        ts: Date.now()
+      };
+      if (parsed.imageQuery || wantsImage(text)) {
+        message.image = makeUnsplashImage(parsed.imageQuery || makeImageQuery(text));
+      }
+      return message;
+    }
+
+    function buildGeminiHistory(text) {
+      const recent = state.chat.slice(-8).map((message) => ({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text: String(message.text || "").slice(0, 1200) }]
+      }));
+      recent.push({ role: "user", parts: [{ text }] });
+      return recent;
+    }
+
+    function wantsImage(text) {
+      return /(картин|изображ|иллюстрац|фото|схем|покажи|визуализ|нарисуй)/i.test(text);
+    }
+
+    function makeImageQuery(text) {
+      const lower = text.toLowerCase();
+      const hint = imageHints.find(([needle]) => lower.includes(needle));
+      return hint ? hint[1] : "education study classroom";
+    }
+
+    function extractImageQuery(raw) {
+      const lines = raw.split(/\r?\n/);
+      let imageQuery = "";
+      const kept = [];
+      lines.forEach((line) => {
+        const match = line.match(/^IMAGE_QUERY\s*:\s*(.+)$/i);
+        if (match) {
+          imageQuery = match[1].trim().replace(/[^\w\s-]/g, "").slice(0, 90);
+        } else {
+          kept.push(line);
+        }
+      });
+      return {
+        text: kept.join("\n").trim() || "Готово. Ниже добавил учебную иллюстрацию.",
+        imageQuery
+      };
+    }
+
+    function makeUnsplashImage(query) {
+      const safeQuery = encodeURIComponent(query || "education");
+      return {
+        src: `https://source.unsplash.com/900x520/?${safeQuery}`,
+        alt: `Иллюстрация: ${query || "education"}`
+      };
+    }
+
+    function makeOfflineAnswer(text, imageQuery) {
+      const lowered = text.toLowerCase();
+      if (lowered.includes("производн")) {
+        return "Коротко: производная показывает скорость изменения функции. Для степенной функции действует правило (x^n)' = n·x^(n-1). Например, у 3x^3 - 2x^2 + 7x - 4 производная равна 9x^2 - 4x + 7.";
+      }
+      if (lowered.includes("квадрат")) {
+        return "Для квадратного уравнения ax² + bx + c = 0 сначала находят дискриминант D = b² - 4ac. Если D > 0, есть два корня; если D = 0, один; если D < 0, действительных корней нет.";
+      }
+      if (lowered.includes("тригоном")) {
+        return "В тригонометрии важно не терять периодичность. Для sin x = a общее решение записывают через (-1)^n·arcsin(a) + πn, а для cos x = a через ±arccos(a) + 2πn.";
+      }
+      if (imageQuery) {
+        return `Подобрал учебный визуальный запрос: ${imageQuery}. По теме можно начать с определения ключевых понятий, затем разобрать схему и подписать главные элементы.`;
+      }
+      return "Я могу помочь разобрать тему по шагам. Сейчас включен офлайн-режим, поэтому отвечаю краткой встроенной подсказкой. Для полноценного Gemini-подключения нужен безопасный серверный прокси, а не публичный ключ в HTML.";
+    }
+
+    function describeApiError(error) {
+      if (!navigator.onLine) {
+        return {
+          title: "Нет интернета",
+          message: "Проверьте подключение и попробуйте отправить сообщение еще раз.",
+          chatText: "Не получилось обратиться к Gemini: похоже, устройство офлайн."
+        };
+      }
+      const status = Number(error?.status || 0);
+      if (status === 400 || status === 401 || status === 403) {
+        return {
+          title: "Проблема с API-ключом",
+          message: "Ключ неверный, заблокирован или не имеет доступа к модели Gemini Flash.",
+          chatText: "Gemini отклонил запрос из-за ключа или прав доступа. Проверьте ключ и доступ к модели."
+        };
+      }
+      if (status === 429) {
+        return {
+          title: "Лимит API исчерпан",
+          message: "Слишком много запросов. Подождите немного и попробуйте снова.",
+          chatText: "Gemini сообщил о превышении лимита. Лучше повторить запрос позже."
+        };
+      }
+      if (status >= 500) {
+        return {
+          title: "Сбой на стороне API",
+          message: "Сервис Gemini временно недоступен. Попробуйте повторить запрос позже.",
+          chatText: "Сервис Gemini временно не ответил. Я не буду повторять запрос автоматически, чтобы не тратить лимиты."
+        };
+      }
+      return {
+        title: "Запрос не выполнен",
+        message: "Ответ не получен. Проверьте сеть, ключ и доступность API.",
+        chatText: "Не удалось получить ответ от Gemini. Интерфейс продолжает работать, запрос можно повторить позже."
+      };
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    function initPhysics() {
+      const select = document.getElementById("physicsFormula");
+      const topics = document.getElementById("physicsTopics");
+      if (!select || !topics) return;
+      select.innerHTML = "";
+      physicsFormulas.forEach((formula) => {
+        const option = document.createElement("option");
+        option.value = formula.id;
+        option.textContent = `${formula.topic}: ${formula.name}`;
+        select.appendChild(option);
+      });
+      [...new Set(physicsFormulas.map((item) => item.topic))].forEach((topic) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip tap-button";
+        button.textContent = topic;
+        button.addEventListener("click", () => {
+          select.value = physicsFormulas.find((item) => item.topic === topic).id;
+          renderPhysics();
+        });
+        topics.appendChild(button);
+      });
+      select.addEventListener("change", renderPhysics);
+      renderPhysics();
+    }
+
+    function renderPhysics() {
+      const select = document.getElementById("physicsFormula");
+      const controls = document.getElementById("physicsControls");
+      const formula = physicsFormulas.find((item) => item.id === select?.value) || physicsFormulas[0];
+      if (!formula || !controls) return;
+      document.getElementById("physicsTopic").textContent = formula.topic;
+      document.getElementById("physicsName").textContent = formula.name;
+      document.getElementById("physicsLatex").textContent = formula.latex;
+      document.getElementById("physicsDesc").textContent = formula.desc;
+      controls.innerHTML = "";
+      formula.vars.forEach(([id, label, min, max, step, value, unit]) => {
+        const wrap = document.createElement("label");
+        wrap.className = "grid gap-2";
+        wrap.innerHTML = `
+          <span class="flex items-center justify-between gap-3 text-sm font-bold"><span>${escapeHTML(label)}</span><span><b data-physics-value="${escapeHTML(id)}">${escapeHTML(value)}</b> ${escapeHTML(unit)}</span></span>
+          <input class="w-full" type="range" min="${min}" max="${max}" step="${step}" value="${value}" data-physics-var="${escapeHTML(id)}">
+        `;
+        controls.appendChild(wrap);
+      });
+      controls.querySelectorAll("input").forEach((input) => input.addEventListener("input", updatePhysicsResult));
+      updatePhysicsResult();
+    }
+
+    function updatePhysicsResult() {
+      const select = document.getElementById("physicsFormula");
+      const formula = physicsFormulas.find((item) => item.id === select?.value) || physicsFormulas[0];
+      const values = {};
+      document.querySelectorAll("[data-physics-var]").forEach((input) => {
+        values[input.dataset.physicsVar] = Number(input.value);
+        const out = document.querySelector(`[data-physics-value="${input.dataset.physicsVar}"]`);
+        if (out) out.textContent = fmtNumber(Number(input.value));
+      });
+      const result = formula.calc(values);
+      document.getElementById("physicsResult").textContent = `${fmtNumber(result)} ${formula.unit}`;
+    }
+
+    function initChemistry() {
+      const chips = document.getElementById("elementChips");
+      const search = document.getElementById("elementSearch");
+      if (!chips || !search) return;
+      chips.innerHTML = "";
+      elements.forEach((element) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip tap-button";
+        button.textContent = element.symbol;
+        button.addEventListener("click", () => {
+          search.value = element.name;
+          renderElement(element);
+        });
+        chips.appendChild(button);
+      });
+      search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        const found = elements.find((e) => e.symbol.toLowerCase() === q || e.name.toLowerCase().includes(q));
+        if (found) renderElement(found);
+      });
+      renderElement(elements[0]);
+    }
+
+    function renderElement(element) {
+      const card = document.getElementById("elementCard");
+      if (!card || !element) return;
+      const cells = Array.from({ length: 8 }, (_, index) => {
+        const n = index + 1;
+        return `<div><div class="valence-cell ${element.valences.includes(n) ? "active" : ""}"></div><div class="mt-1 text-center text-xs text-[var(--muted)]">${n}</div></div>`;
+      }).join("");
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted)]">${escapeHTML(element.type)}</p>
+            <h3 class="mt-1 text-4xl font-black">${escapeHTML(element.symbol)}</h3>
+            <p class="mt-1 text-xl font-extrabold">${escapeHTML(element.name)}</p>
+          </div>
+          <span class="chip">№ ${escapeHTML(element.z)}</span>
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Атомная масса</p><p class="mt-1 font-extrabold">${escapeHTML(element.mass)}</p></div>
+          <div class="soft-card p-3"><p class="text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Конфигурация</p><p class="mt-1 font-extrabold">${escapeHTML(element.config)}</p></div>
+        </div>
+        <div class="mt-5">
+          <p class="mb-2 text-sm font-bold text-[var(--muted)]">Валентность</p>
+          <div class="grid grid-cols-8 gap-2">${cells}</div>
+        </div>
+      `;
+    }
+
+    function initHistory() {
+      const era = document.getElementById("historyEra");
+      const year = document.getElementById("historyYear");
+      if (!era || !year) return;
+      era.innerHTML = '<option value="">Все эпохи</option>';
+      [...new Set(historyEvents.map((event) => event.era))].forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        era.appendChild(option);
+      });
+      era.addEventListener("change", renderHistory);
+      year.addEventListener("input", renderHistory);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById("historyList");
+      const era = document.getElementById("historyEra")?.value || "";
+      const year = Number(document.getElementById("historyYear")?.value || 0);
+      if (!list) return;
+      list.innerHTML = "";
+      historyEvents
+        .filter((event) => (!era || event.era === era) && (!year || event.year >= year))
+        .forEach((event) => {
+          const card = document.createElement("div");
+          card.className = "soft-card overflow-hidden";
+          card.innerHTML = `
+            <button class="tap-button flex w-full items-center justify-between gap-3 p-4 text-left" type="button" aria-expanded="false">
+              <span><span class="block text-sm font-black text-[var(--emerald)]">${event.year}</span><span class="block font-extrabold">${escapeHTML(event.title)}</span></span>
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="hidden border-t border-[var(--line)] px-4 pb-4 pt-3 text-sm leading-6 text-[var(--muted)]">
+              <p>${escapeHTML(event.context)}</p>
+              <p class="mt-2"><b class="text-[var(--text)]">Значение:</b> ${escapeHTML(event.meaning)}</p>
+            </div>
+          `;
+          const button = card.querySelector("button");
+          const body = card.querySelector("div");
+          button.addEventListener("click", () => {
+            const open = button.getAttribute("aria-expanded") === "true";
+            button.setAttribute("aria-expanded", String(!open));
+            body.classList.toggle("hidden", open);
+          });
+          list.appendChild(card);
+        });
+      if (!list.children.length) {
+        const empty = document.createElement("p");
+        empty.className = "text-sm text-[var(--muted)]";
+        empty.textContent = "Нет событий под выбранный фильтр.";
+        list.appendChild(empty);
+      }
+      refreshIcons();
+    }
+
+    function initApp() {
+      if (!Array.isArray(state.chat)) {
+        state.chat = [];
+        storage.set(STORAGE_KEYS.chat, state.chat);
+      }
+      applyTheme(state.theme);
+      updateToday();
+      initNavigation();
+      initCountrySearch();
+      initAlgebra();
+      initPhysics();
+      initChemistry();
+      initHistory();
+      initChat();
+      updateHapticsButton();
+      refreshIcons();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initApp, { once: true });
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
